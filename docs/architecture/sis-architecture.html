@@ -1,0 +1,2249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Faculty of Science SIS Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky contents rail on the left, a single reading column on the right; rail collapses to a drawer on narrow screens. */
+:root{
+  --bg:#f4f6f9; --paper:#ffffff; --sunk:#eaeef3; --ink:#15202b; --muted:#566475; --line:#d6dee7;
+  --accent:#0b5f6b; --accent-soft:#e1f0f1; --chip:#eef1f6; --chip-ink:#2b3a4a; --code:#f1f4f8;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1319; --paper:#151c24; --sunk:#1c2530; --ink:#e3e9f0; --muted:#98a6b6; --line:#2a3542;
+  --accent:#5cc3cf; --accent-soft:#16343a; --chip:#1f2a36; --chip-ink:#c9d5e2; --code:#1a222c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1319; --paper:#151c24; --sunk:#1c2530; --ink:#e3e9f0; --muted:#98a6b6; --line:#2a3542;
+  --accent:#5cc3cf; --accent-soft:#16343a; --chip:#1f2a36; --chip-ink:#c9d5e2; --code:#1a222c; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.6 var(--f-body)}
+a{color:var(--accent)}
+.shell{display:grid;grid-template-columns:290px minmax(0,1fr);max-width:1400px;margin:0 auto;gap:0}
+@media (max-width:1000px){.shell{grid-template-columns:minmax(0,1fr)}}
+
+/* contents rail */
+nav.toc{position:sticky;top:0;height:100vh;overflow:auto;padding:28px 18px 40px max(18px,env(safe-area-inset-left,0px));border-right:1px solid var(--line);font-size:.86rem}
+nav.toc .brand{font:800 1.02rem var(--f-display);margin:0 0 4px;letter-spacing:-.01em}
+nav.toc .meta{color:var(--muted);font-size:.78rem;margin-bottom:18px}
+nav.toc ul{list-style:none;margin:0;padding:0}
+nav.toc > ul > li{margin-top:12px}
+nav.toc > ul > li > a{font-weight:600;color:var(--ink)}
+nav.toc ul ul{margin:4px 0 0 0;border-left:1px solid var(--line)}
+nav.toc ul ul a{display:block;padding:3px 0 3px 12px;color:var(--muted);margin-left:-1px;border-left:2px solid transparent}
+nav.toc a{text-decoration:none}
+nav.toc a:hover{color:var(--accent)}
+nav.toc a.active{color:var(--accent);border-left-color:var(--accent)}
+nav.toc .tools{display:flex;gap:6px;margin:18px 0 0}
+.btn{font:600 .78rem var(--f-body);border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:6px 10px;border-radius:7px;cursor:pointer}
+.btn:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.menu-btn{display:none}
+@media (max-width:1000px){
+  nav.toc{position:fixed;inset:0 auto 0 0;width:min(320px,86vw);z-index:20;background:var(--paper);transform:translateX(-102%);transition:transform .2s;box-shadow:0 0 0 100vmax transparent}
+  nav.toc.open{transform:none;box-shadow:0 0 0 100vmax rgb(0 0 0 / .35)}
+  .menu-btn{display:inline-flex;position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:max(12px,env(safe-area-inset-right,0px));z-index:21}
+}
+
+/* reading column */
+main{padding:36px max(20px,env(safe-area-inset-right,0px)) 80px max(20px,env(safe-area-inset-left,0px));min-width:0}
+article{max-width:900px;margin:0 auto}
+article > h1:first-child{font:800 2.3rem/1.15 var(--f-display);letter-spacing:-.02em;margin:0 0 18px}
+h1,h2,h3,h4{font-family:var(--f-display);text-wrap:balance;letter-spacing:-.01em;line-height:1.25}
+h1{font-size:1.9rem;font-weight:800;margin:64px 0 8px;padding-top:28px;border-top:3px solid var(--ink)}
+h2{font-size:1.4rem;font-weight:700;margin:44px 0 10px}
+h3{font-size:1.1rem;font-weight:700;margin:30px 0 8px}
+h4{font-size:1rem;margin:22px 0 6px}
+p,li{max-width:72ch}
+hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+ul,ol{padding-left:22px}
+li{margin:3px 0}
+strong{font-weight:600}
+code{font:500 .86em var(--f-mono);background:var(--code);padding:1px 5px;border-radius:4px}
+pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font:400 .84rem/1.55 var(--f-mono)}
+pre code{background:none;padding:0;font-size:inherit}
+
+/* tables */
+.table-wrap{overflow-x:auto;margin:14px 0 20px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{font:700 .72rem var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--sunk);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td strong:only-child{font-family:var(--f-display);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)}
+td:first-child{white-space:nowrap}
+
+/* ids */
+.rid{display:inline-block;font:500 .78em var(--f-mono);background:var(--chip);color:var(--chip-ink);padding:0 5px;border-radius:4px;white-space:nowrap}
+
+/* diagrams */
+.diagram{margin:16px 0 22px;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow-x:auto}
+pre.mermaid{background:none;border:0;padding:0;margin:0;font-family:var(--f-body);text-align:center}
+pre.mermaid:not([data-processed]){color:var(--muted);font-size:.75rem;text-align:left}
+
+.diagram{position:relative}
+.diagram .zoom-btn{position:absolute;top:8px;right:8px;opacity:.85}
+.diagram .zoom-btn:hover{opacity:1}
+.diagram pre.mermaid[data-processed]{cursor:zoom-in}
+
+/* zoom viewer */
+.viewer{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column}
+.viewer[hidden]{display:none}
+.viewer .bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:calc(env(safe-area-inset-top,0px) + 10px) max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);background:var(--paper)}
+.viewer .bar .title{font:700 .95rem var(--f-display);margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.viewer .bar .pct{font:500 .8rem var(--f-mono);color:var(--muted);min-width:4.5ch;text-align:right;font-variant-numeric:tabular-nums}
+.viewer .stage{flex:1;overflow:hidden;position:relative;cursor:grab;touch-action:none;background:
+  radial-gradient(circle,var(--line) 1px,transparent 1.2px) 0 0/22px 22px}
+.viewer .stage.dragging{cursor:grabbing}
+.viewer .canvas{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.viewer .canvas svg{display:block;max-width:none!important;height:auto}
+.viewer .hint{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);transform:translateX(-50%);font-size:.76rem;color:var(--muted);background:var(--paper);border:1px solid var(--line);padding:4px 10px;border-radius:999px;pointer-events:none;white-space:nowrap}
+@media print{.zoom-btn,.viewer{display:none!important}}
+
+/* front matter */
+article > h1:first-child ~ p:nth-of-type(-n+2){color:var(--muted)}
+
+@media (max-width:600px){article > h1:first-child{font-size:1.8rem}h1{font-size:1.55rem}}
+@media print{
+  nav.toc,.menu-btn{display:none!important}
+  .shell{display:block}
+  body{background:#fff;color:#000;font-size:11pt}
+  h1{page-break-before:always}
+  article > h1:first-child{page-break-before:avoid}
+  .diagram,.table-wrap,pre{page-break-inside:avoid;border-color:#bbb}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}nav.toc{transition:none}}
+</style>
+</head>
+<body>
+<button class="btn menu-btn" id="menu" type="button" aria-controls="toc" aria-expanded="false">Contents</button>
+<div class="shell">
+  <nav class="toc" id="toc" aria-label="Contents">
+    <p class="brand">Faculty of Science SIS</p>
+    <div class="meta">System architecture · Draft v0.2</div>
+    <ul><li><a href="#faculty-of-science-sis-system-architecture">Faculty of Science SIS: System Architecture</a></li><li><a href="#part-a-what-the-system-has-to-model">Part A: What the system has to model</a><ul><li><a href="#a1-requirement-catalogue">A1. Requirement catalogue</a></li><li><a href="#a2-how-the-degree-programmes-differ">A2. How the degree programmes differ</a></li><li><a href="#a3-design-drivers">A3. Design drivers</a></li></ul></li><li><a href="#part-b-baseline-architecture-v01">Part B: Baseline architecture (v0.1)</a><ul><li><a href="#b1-architectural-style">B1. Architectural style</a></li><li><a href="#b2-system-context">B2. System context</a></li><li><a href="#b3-containers">B3. Containers</a></li><li><a href="#b4-modules-components">B4. Modules (components)</a></li><li><a href="#b5-cross-cutting-components">B5. Cross-cutting components</a></li><li><a href="#b6-core-data-model">B6. Core data model</a></li><li><a href="#b7-key-flows">B7. Key flows</a></li><li><a href="#b8-requirement-traceability">B8. Requirement traceability</a></li></ul></li><li><a href="#part-c-gap-analysis-and-refined-architecture-v02">Part C: Gap analysis and refined architecture (v0.2)</a><ul><li><a href="#c1-gaps-found">C1. Gaps found</a></li><li><a href="#c2-requirements-that-conflict-with-the-handbook">C2. Requirements that conflict with the handbook</a></li><li><a href="#c3-architecture-changes">C3. Architecture changes</a></li><li><a href="#c4-non-functional-requirements">C4. Non-functional requirements</a></li><li><a href="#c5-deployment">C5. Deployment</a></li><li><a href="#c6-technology-choices">C6. Technology choices</a></li><li><a href="#c7-delivery-phases">C7. Delivery phases</a></li><li><a href="#c8-open-questions">C8. Open questions</a></li></ul></li></ul>
+    <div class="tools"><button class="btn" type="button" id="theme">Toggle theme</button></div>
+  </nav>
+  <main><article>
+<h1 id="faculty-of-science-sis-system-architecture">Faculty of Science SIS: System Architecture</h1>
+<p><strong>Scope:</strong> a web-based Student Information System (SIS) to manage the academic activities of the Faculty of Science, University of Kelaniya.</p>
+<p><strong>Status:</strong> Draft v0.2. v0.1 is the baseline architecture (Part B). The refinements from the gap analysis are in Part C.</p>
+<hr />
+<h1 id="part-a-what-the-system-has-to-model">Part A: What the system has to model</h1>
+<h2 id="a1-requirement-catalogue">A1. Requirement catalogue</h2>
+<p>The <em>General Requirements</em> sheet has no IDs, so this document assigns them. The IDs follow the sheet's six groups and keep its numbering.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement (from the template)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>REG: Registration</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><span class="rid">REG-01</span></td>
+<td>Students register for course units for the academic year</td>
+</tr>
+<tr>
+<td><span class="rid">REG-02</span></td>
+<td>Students register for Semester I units (Biological Science stream)</td>
+</tr>
+<tr>
+<td><span class="rid">REG-03</span></td>
+<td>Students add or drop course units, with prerequisite checks</td>
+</tr>
+<tr>
+<td><span class="rid">REG-04</span></td>
+<td>Students register for repeat or medical examinations, with online payment</td>
+</tr>
+<tr>
+<td><span class="rid">REG-05</span></td>
+<td>Course modules can be changed before and during the semester, and affected students moved to the changed modules</td>
+</tr>
+<tr>
+<td><span class="rid">REG-06</span></td>
+<td>Student personal details are held and editable: name, gender, registered date, degree validity date, mobile, land line, personal and KLN email, valid academic year</td>
+</tr>
+<tr>
+<td><span class="rid">REG-07</span></td>
+<td>Detect clashes between modules</td>
+</tr>
+<tr>
+<td><span class="rid">REG-08</span></td>
+<td>Move a student's results to a new registration number when the number changes</td>
+</tr>
+<tr>
+<td><span class="rid">REG-09</span></td>
+<td>Alert the student when their credits are not enough, during registration and add/drop</td>
+</tr>
+<tr>
+<td><span class="rid">REG-10</span></td>
+<td>Show repeat and medical modules separately in the student interface, with the credits still needed</td>
+</tr>
+<tr>
+<td><span class="rid">REG-11</span></td>
+<td>Remove students who have upgraded or cancelled their registration</td>
+</tr>
+<tr>
+<td><span class="rid">REG-12</span></td>
+<td>Suspend the academic registration of students under disciplinary inquiry</td>
+</tr>
+<tr>
+<td><span class="rid">REG-13</span></td>
+<td>Notify students to submit an appeal to sit exams once five years have passed</td>
+</tr>
+<tr>
+<td><span class="rid">REG-14</span></td>
+<td>Student interface: login, view results, view final results, reset password, exam admission</td>
+</tr>
+<tr>
+<td><span class="rid">REG-15</span></td>
+<td>Show modules from other faculties separately (including BSSS and BECS)</td>
+</tr>
+<tr>
+<td><span class="rid">REG-16</span></td>
+<td>Defer a student's modules to the next academic year</td>
+</tr>
+<tr>
+<td><span class="rid">REG-17</span></td>
+<td>Generate the class roll</td>
+</tr>
+<tr>
+<td><span class="rid">REG-18</span></td>
+<td>Record class attendance</td>
+</tr>
+<tr>
+<td><strong>REQ: Student requests and appeals</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><span class="rid">REQ-01</span></td>
+<td>Students submit exam deferment appeals and other appeals through the SIS</td>
+</tr>
+<tr>
+<td><span class="rid">REQ-02</span></td>
+<td>Students obtain a Medium of Instruction letter</td>
+</tr>
+<tr>
+<td><span class="rid">REQ-03</span></td>
+<td>Students obtain an interim results sheet, detailed results sheet or transcript, with online payment</td>
+</tr>
+<tr>
+<td><span class="rid">REQ-04</span></td>
+<td>Prepare the final results sheet, and download or print it</td>
+</tr>
+<tr>
+<td><span class="rid">REQ-05</span></td>
+<td>Students request an early exit</td>
+</tr>
+<tr>
+<td><span class="rid">REQ-06</span></td>
+<td>Students request a fallback exit</td>
+</tr>
+<tr>
+<td><strong>EXM: Examination</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><span class="rid">EXM-01</span></td>
+<td>Repeat-student marks are automatically included as C (see <a href="#c2-requirements-that-conflict-with-the-handbook">C2</a>)</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-02</span></td>
+<td>Hold the examiner list in the SIS and notify examiners of the results-release deadline</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-03</span></td>
+<td>Summarise exam dates against results-release dates</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-04</span></td>
+<td>Summarise modules whose results are unreleased, by department and by degree programme</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-05</span></td>
+<td>Staff upload CA, practical and final marks. Results are released after the HoD recommends them and the Dean approves, and students see them in real time. Release procedure: update attendance → set mark criteria → first examiner enters marks (3 weeks) → reminder → second examiner verifies (1 week) → reminder → HoD → Dean → release</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-06</span></td>
+<td>Hold exam admission for students who have not completed University administrative registration</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-07</span></td>
+<td>Allocate exam halls by student count</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-08</span></td>
+<td>Prepare duty lists for supervisors, invigilators and hall attendants</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-09</span></td>
+<td>Move a student's results from one student number to another (same as <span class="rid">REG-08</span>)</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-10</span></td>
+<td>Decide whether degree requirements are met, using the handbook criteria, GPA and class, and show the outcome to the student</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-11</span></td>
+<td>Download and print the final pass list (name, class, GPA) for each degree</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-12</span></td>
+<td>Withhold a student's results and block their module registration</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-13</span></td>
+<td>Produce the exam attendance sheet, mark sheet, first and second examiner mark sheets and moderation sheet, with exam date, time and venue</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-14</span></td>
+<td>Prepare the exam timetable and show it to staff</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-15</span></td>
+<td>Students view, download and print their exam admission</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-16</span></td>
+<td>Update exam attendance after the exam</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-17</span></td>
+<td>Send weekly reminders to examiners who miss the results deadline</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-18</span></td>
+<td>Upload module results</td>
+</tr>
+<tr>
+<td><strong>SCH: Schedules and summaries</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><span class="rid">SCH-01</span></td>
+<td>Registered list for each module: proper and repeat students, together or separately</td>
+</tr>
+<tr>
+<td><span class="rid">SCH-02</span></td>
+<td>Registered list for each module, with each student's pathway</td>
+</tr>
+<tr>
+<td><span class="rid">SCH-03</span></td>
+<td>Registration numbers of students with clashing modules</td>
+</tr>
+<tr>
+<td><span class="rid">SCH-04</span></td>
+<td>Per-student record for each academic year: modules, repeat and medical modules, GPA, credit count</td>
+</tr>
+<tr>
+<td><span class="rid">SCH-05</span></td>
+<td>Counts of proper and repeat registrations in one summary</td>
+</tr>
+<tr>
+<td><span class="rid">SCH-06</span></td>
+<td>Module registrations with student counts, by year of study</td>
+</tr>
+<tr>
+<td><span class="rid">SCH-07</span></td>
+<td>Students in each year of study, with name, registration number and gender</td>
+</tr>
+<tr>
+<td><span class="rid">SCH-08</span></td>
+<td>Students and counts by pathway and by degree</td>
+</tr>
+<tr>
+<td><strong>SEL: Selections</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><span class="rid">SEL-01</span></td>
+<td>Pathway selection: Physical Science stream</td>
+</tr>
+<tr>
+<td><span class="rid">SEL-02</span></td>
+<td>Pathway selection: Biological Science stream</td>
+</tr>
+<tr>
+<td><span class="rid">SEL-03</span></td>
+<td>Honours selection: Physical, Biological, BECS, ENCM</td>
+</tr>
+<tr>
+<td><span class="rid">SEL-04</span></td>
+<td>Prepare, publish and download the Dean's list; students can request a Dean's list letter</td>
+</tr>
+<tr>
+<td><span class="rid">SEL-05</span></td>
+<td>Pathway selection: Management and Information Technology</td>
+</tr>
+<tr>
+<td><span class="rid">SEL-06</span></td>
+<td>Pathway selection: Information Technology</td>
+</tr>
+<tr>
+<td><strong>ANA: Data analytics</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><span class="rid">ANA-01</span></td>
+<td>Descriptive: results summary per module, attendance, continuous assessment</td>
+</tr>
+<tr>
+<td><span class="rid">ANA-02</span></td>
+<td>Diagnostic: GPA calculations, results comparison, pass rates</td>
+</tr>
+<tr>
+<td><span class="rid">ANA-03</span></td>
+<td>Predictive: five-year results trends and predictions; enrolment predictions</td>
+</tr>
+</tbody>
+</table></div>
+<p>These items from the per-programme sheet are <strong>not</strong> in the general list:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="rid">PS-01</span></td>
+<td>Aptitude test and foundation course for all selected BSSS students</td>
+<td>BSSS, Y1 S1</td>
+</tr>
+<tr>
+<td><span class="rid">PS-02</span></td>
+<td>Manage registration schedules: open and close dates, add/drop period</td>
+<td>BSSS, every year</td>
+</tr>
+<tr>
+<td><span class="rid">PS-03</span></td>
+<td>Course changes allowed only in the first two weeks</td>
+<td>BSSS (handbook §1.7 applies to all)</td>
+</tr>
+<tr>
+<td><span class="rid">PS-04</span></td>
+<td>Assign first and second examiners when the course starts</td>
+<td>BSSS (<span class="rid">EXM-05</span> implies for all)</td>
+</tr>
+<tr>
+<td><span class="rid">PS-05</span></td>
+<td>Progression requires GPA &gt; 2.0, considering new, repeat and missed batches</td>
+<td>BSSS, Y3</td>
+</tr>
+<tr>
+<td><span class="rid">PS-06</span></td>
+<td>Project coordinator publishes the supervisor list; students give 3 preferences; coordinator allocates by GPA; students are notified</td>
+<td>BSSS, Y4</td>
+</tr>
+<tr>
+<td><span class="rid">PS-07</span></td>
+<td>Generate transcript</td>
+<td>BSSS, Y4</td>
+</tr>
+<tr>
+<td><span class="rid">PS-08</span></td>
+<td>Selection between BSc Hons IT and BSc Hons MIT, and MIT specialisation (BSE, OSCM, IS)</td>
+<td>MIT/IT</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="a2-how-the-degree-programmes-differ">A2. How the degree programmes differ</h2>
+<p>The programmes vary along the dimensions below. Each one becomes a design constraint (DC) in A3.</p>
+<h3 id="a21-programme-families">A2.1 Programme families</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Programmes</th>
+<th>Entry</th>
+<th>Selection points</th>
+<th>Structure</th>
+<th>Exits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Stream BSc</strong> (SLQF 5)</td>
+<td>BSc via Biological Science (8 combinations) and Physical Science (10 combinations)</td>
+<td>UGC to stream (221 / 362 places)</td>
+<td><strong>BS:</strong> subjects chosen at start of Y1 S2, ranked on S1 results; caps BIOC 60, COST 25, MIBI 60. <strong>PS:</strong> subjects chosen at start of Y1; caps COSC 150, COST 25, ELEC 40, STAT 125</td>
+<td>Combination of 2–3 subjects. A unit is C, O or A depending on the combination</td>
+<td>Award after 3 years</td>
+</tr>
+<tr>
+<td><strong>Fixed BSc</strong></td>
+<td>BSc ENCM, BSc PE (2 paths)</td>
+<td>UGC direct (109 / 76 places)</td>
+<td>PE path</td>
+<td>Fixed per path</td>
+<td>Award after 3 years</td>
+</tr>
+<tr>
+<td><strong>Merit Honours</strong> (SLQF 6)</td>
+<td>14 subjects / 15 rule sets</td>
+<td>Applied for at end of Y2 from Stream BSc, ENCM or PE</td>
+<td>End of Y2: common gate plus subject-specific grade rules; department caps</td>
+<td>Years 1–2 from the combination; Years 3–4 from the Honours column, which depends on the stream and, for Physics, on whether the student took Electronics</td>
+<td>Revert to BSc during Y4, or within 14 days of Y4 results</td>
+</tr>
+<tr>
+<td><strong>Direct Honours, fixed</strong></td>
+<td>APCH, BSSS</td>
+<td>UGC direct</td>
+<td>None. BSSS has a foundation programme and aptitude test</td>
+<td>Fixed. BSSS has Level 0 foundation units</td>
+<td>None stated</td>
+</tr>
+<tr>
+<td><strong>Direct Honours, branching</strong></td>
+<td>MIT/IT, SENG, BECS</td>
+<td>UGC direct</td>
+<td><strong>MIT/IT:</strong> split at end of Y1 (performance and preference); MIT specialisation at end of Y2. <strong>SENG:</strong> 1 of 6 domains (≥ 9 credits). <strong>BECS:</strong> specialisation at end of Y2 behind a subject-GPA gate</td>
+<td>Branch-specific columns</td>
+<td><strong>MIT/IT:</strong> 3-year BSc exit, or Higher Diploma fallback after Y2. <strong>BECS:</strong> revert to BSc</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="a22-rule-variants-the-rules-engine-must-express">A2.2 Rule variants the rules engine must express</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Rule shape</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Credit minimum at a grade threshold, for a scope</td>
+<td>"≥ 72 C-or-better credits"; "≥ 48 from two subjects, ≥ 24 each"</td>
+</tr>
+<tr>
+<td>Per-period minimum</td>
+<td>≥ 30 credits <strong>per academic year</strong> (BSc); ≥ 30 <strong>per SLQF level</strong> (BECS, BSSS)</td>
+</tr>
+<tr>
+<td>Cap on weak grades</td>
+<td>≤ 8 credits of D/D+/C− in Y1–2 (Honours gate); ≤ 6 per <strong>subject area</strong> (ENCM)</td>
+</tr>
+<tr>
+<td>Grade ban</td>
+<td>No E in Y1–2 (gate); no E in specialisation units (Honours)</td>
+</tr>
+<tr>
+<td>Unit-specific grade</td>
+<td>C or better in INTE 31356, GNCT 32216 …; B+ in BIOL 11522 (MBBT)</td>
+</tr>
+<tr>
+<td>Share of credits</td>
+<td>A or better in ≥ ½ of Level 4 specialisation credits (First Class)</td>
+</tr>
+<tr>
+<td>GPA threshold for a scope</td>
+<td>Overall GPA ≥ 2.00; <strong>subject</strong> GPA ≥ 3.00 (BECS specialisation)</td>
+</tr>
+<tr>
+<td>Time limit</td>
+<td>Award within 5 or 6 consecutive years; class within 3 or 4</td>
+</tr>
+<tr>
+<td>Pick from a set</td>
+<td>≥ 9 credits from one SENG domain; "MGTE 43216 <strong>or</strong> INTE 43216"</td>
+</tr>
+<tr>
+<td>Borderline discretion</td>
+<td>≤ 6 credits of D/D+/C− in Y4 → the Board may still award the next class down</td>
+</tr>
+<tr>
+<td>Prerequisite kinds</td>
+<td>Unit; GCE A/L subject; group ("all Y1–2 compulsory PHYS units"); co-requisite; programme-restricted ("only students <strong>not</strong> taking Electronics"); capacity-limited; alternate-year offering</td>
+</tr>
+<tr>
+<td>Exclusions from GPA</td>
+<td>ACLT 11013, CMSK units, MGMT 11022, CHEM 11601 and others that are non-GPA but still required</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="a23-facts-that-shape-the-data-model">A2.3 Facts that shape the data model</h3>
+<ul>
+<li><strong>The same unit has a different status in different programmes.</strong> PHYS 32551 is compulsory for students without Electronics and unavailable to everyone else. So C/O/A status belongs to a <em>programme-structure entry</em>, not to the course unit.</li>
+<li><strong>A student's structure is assembled.</strong> A merit Honours student's structure is their Y1–2 combination plus the Y3–4 Honours column. The system needs a <strong>study plan per student</strong>, built from versioned structure fragments.</li>
+<li><strong>Rules are tied to a handbook year.</strong> A 2023/24 intake keeps 2023/24 rules until it graduates. Programmes, structures, units and rules must be <strong>versioned by curriculum edition</strong>, with each student pinned to one edition.</li>
+<li><strong>Credits and level can be read from the code.</strong> For <code>XXXX abcde</code>, <code>a</code> is the level, <code>b</code> the semester (1, 2, 3 = both, 4 = either) and <code>e</code> the credits. The code is still stored as data and validated, because the handbook has exceptions.</li>
+<li><strong>Grade points:</strong> A+ = 4.0 down to E = 0.0, with A− = 3.7, C− = 1.7 and so on. GPA is computed to 2 decimals. An absent result counts as 0.</li>
+<li><strong>Repeats:</strong> the best grade obtainable on a re-sit is <strong>C</strong>, and the earlier grade stands if the re-sit is lower (§2.3).</li>
+<li><strong>Lab attendance caps grades:</strong> 50–79% caps at C; below 50% caps at D (§1.8).</li>
+</ul>
+<h2 id="a3-design-drivers">A3. Design drivers</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Driver</th>
+<th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="rid">DC-1</span></td>
+<td>Programme rules vary widely and change each handbook year</td>
+<td>Regulations are <strong>data plus a declarative rules engine</strong>, not code branches per programme</td>
+</tr>
+<tr>
+<td><span class="rid">DC-2</span></td>
+<td>Status and structure depend on programme, pathway and edition</td>
+<td>Separate <strong>Catalogue</strong> (units) from <strong>Programme Structure</strong> (versioned C/O/A entries) and the <strong>Study Plan</strong> (per student)</td>
+</tr>
+<tr>
+<td><span class="rid">DC-3</span></td>
+<td>Results are high-stakes and change through multi-step approval</td>
+<td>A <strong>workflow and state machine</strong> for result sheets; immutable audit log; marks are not edited after release, only amended</td>
+</tr>
+<tr>
+<td><span class="rid">DC-4</span></td>
+<td>Eligibility outcomes must be explainable</td>
+<td>The rules engine returns an <strong>explanation tree</strong> that students and staff can read</td>
+</tr>
+<tr>
+<td><span class="rid">DC-5</span></td>
+<td>Registration windows bring peak load</td>
+<td>Validation runs in-process; registration writes are transactional; reads are cached</td>
+</tr>
+<tr>
+<td><span class="rid">DC-6</span></td>
+<td>Many approval roles (examiners, HoD, Dean, coordinators) and scopes (department, programme, module)</td>
+<td><strong>RBAC with scoped grants</strong></td>
+</tr>
+<tr>
+<td><span class="rid">DC-7</span></td>
+<td>The system must work with existing University systems: admin registration, exam system, payments, email</td>
+<td>An <strong>integration layer</strong> with adapters and an outbox</td>
+</tr>
+<tr>
+<td><span class="rid">DC-8</span></td>
+<td>Many printable outputs (admission cards, sheets, letters, transcripts)</td>
+<td>A <strong>document service</strong> using templates, with verifiable issued documents</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1 id="part-b-baseline-architecture-v01">Part B: Baseline architecture (v0.1)</h1>
+<h2 id="b1-architectural-style">B1. Architectural style</h2>
+<p><strong>A modular monolith, built around business areas, with asynchronous side-effects.</strong></p>
+<p><strong>Why:</strong></p>
+<ul>
+<li><strong>Scale is moderate.</strong> Roughly 1,100 new students a year (about 221 + 362 + 109 + 76 in the BSc streams, plus the direct-intake programmes) gives about 4,000–5,000 active students and a few hundred staff.</li>
+<li><strong>Consistency matters.</strong> Registration, results and awards all need strong transactional consistency across modules. In one database, that is simple and safe.</li>
+<li><strong>The team is likely small</strong> and operations will be on-premises. One deployable unit is far easier to run than microservices.</li>
+</ul>
+<p><strong>How:</strong></p>
+<ul>
+<li>Module boundaries are enforced in code: each module owns its schema and exposes a public interface.</li>
+<li>Modules talk through <strong>in-process interfaces</strong> for queries and <strong>domain events</strong> for side-effects.</li>
+<li>Events go out through a <strong>transactional outbox</strong>, so a module can later be split into its own service without redesign.</li>
+</ul>
+<h2 id="b2-system-context">B2. System context</h2>
+<div class="diagram"><pre class="mermaid">flowchart LR
+  subgraph People
+    ST[Student]
+    LEC[Lecturer / Examiner&lt;br/&gt;1st &amp; 2nd]
+    HOD[Head of Department]
+    DEAN[Dean]
+    PC[Programme Coordinator]
+    FO[Faculty Office /&lt;br/&gt;Exam Branch staff]
+    SUP[Supervisors / Invigilators /&lt;br/&gt;Hall attendants]
+    ADM[System Administrator]
+  end
+
+  SIS((Faculty of Science SIS))
+
+  ST &amp; LEC &amp; HOD &amp; DEAN &amp; PC &amp; FO &amp; SUP &amp; ADM --&gt; SIS
+
+  SIS &lt;--&gt; UREG[University admin registration /&lt;br/&gt;central student records]
+  SIS --&gt; UEX[University examination system&lt;br/&gt;results transfer]
+  SIS &lt;--&gt; PAY[Payment gateway / bank IPG]
+  SIS --&gt; MAIL[KLN email / SMTP]
+  SIS --&gt; SMS[SMS gateway]
+  SIS &lt;--&gt; IDP[University identity provider&lt;br/&gt;KLN accounts]
+  SIS &lt;--&gt; OF[Other faculties&lt;br/&gt;auxiliary module offerings]
+  UGC[UGC admission list] --&gt; SIS
+</pre></div>
+<h2 id="b3-containers">B3. Containers</h2>
+<div class="diagram"><pre class="mermaid">flowchart TB
+  subgraph Clients
+    SPA[Web app&lt;br/&gt;student, staff and admin portals&lt;br/&gt;responsive]
+  end
+
+  subgraph Edge
+    RP[Reverse proxy / WAF&lt;br/&gt;TLS, rate limits]
+  end
+
+  subgraph App[Application]
+    API[SIS API&lt;br/&gt;modular monolith]
+    WRK[Background workers&lt;br/&gt;jobs, schedules, outbox relay]
+    RULES[Rules engine&lt;br/&gt;library, in-process]
+    DOCS[Document renderer&lt;br/&gt;HTML to PDF]
+  end
+
+  subgraph Data
+    DB[(PostgreSQL&lt;br/&gt;schema per module)]
+    RO[(Read replica /&lt;br/&gt;reporting schema)]
+    CACHE[(Redis&lt;br/&gt;cache, sessions, queues)]
+    OBJ[(Object storage&lt;br/&gt;uploads, generated PDFs)]
+  end
+
+  subgraph Platform
+    IAM[Identity &amp; access&lt;br/&gt;OIDC provider]
+    OBS[Logs, metrics, traces]
+    BI[Analytics / BI]
+  end
+
+  SPA --&gt; RP --&gt; API
+  API --&gt; RULES
+  API --&gt; DB
+  API --&gt; CACHE
+  API --&gt; OBJ
+  API -- jobs --&gt; CACHE --&gt; WRK
+  WRK --&gt; DB
+  WRK --&gt; DOCS --&gt; OBJ
+  WRK --&gt; EXT[Integration adapters&lt;br/&gt;payments, email, SMS, university systems]
+  DB --&gt; RO --&gt; BI
+  API &amp; SPA --&gt; IAM
+  API &amp; WRK --&gt; OBS
+</pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Container</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Web app</strong></td>
+<td>One single-page app with role-based navigation. <strong>Student portal:</strong> registration, results, requests, selections, admission card. <strong>Staff portal:</strong> mark entry, approvals, rosters, reports. <strong>Admin console:</strong> catalogue, structures, rules, calendars, users</td>
+</tr>
+<tr>
+<td><strong>SIS API</strong></td>
+<td>All business modules (B4). REST/JSON with an OpenAPI contract. Stateless, and scales horizontally</td>
+</tr>
+<tr>
+<td><strong>Workers</strong></td>
+<td>Scheduled jobs (deadline reminders, time-limit checks), long jobs (bulk selection runs, transcript batches, analytics refresh), outbox relay to integrations</td>
+</tr>
+<tr>
+<td><strong>Rules engine</strong></td>
+<td>Evaluates versioned rule sets (eligibility, award, class, progression, registration constraints) against a student's academic record. Returns a result plus an explanation</td>
+</tr>
+<tr>
+<td><strong>Document renderer</strong></td>
+<td>Renders templates to PDF: admission cards, attendance and mark sheets, pass lists, letters, transcripts</td>
+</tr>
+<tr>
+<td><strong>PostgreSQL</strong></td>
+<td>System of record. One schema per module. Row-level audit triggers on regulated tables</td>
+</tr>
+<tr>
+<td><strong>Read replica / reporting</strong></td>
+<td>Feeds the summaries (SCH) and analytics (ANA) without loading the live database</td>
+</tr>
+<tr>
+<td><strong>Redis</strong></td>
+<td>Cache (catalogue, structures, rules), job queues, rate limiting</td>
+</tr>
+<tr>
+<td><strong>Object storage</strong></td>
+<td>Medical certificates, appeal attachments, generated documents</td>
+</tr>
+<tr>
+<td><strong>IAM</strong></td>
+<td>Single sign-on with KLN accounts, MFA for privileged roles, password reset (<span class="rid">REG-14</span>)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="b4-modules-components">B4. Modules (components)</h2>
+<p>Each module has the same layout:</p>
+<ul>
+<li><strong>domain:</strong> entities, rules</li>
+<li><strong>application:</strong> use cases, commands and queries</li>
+<li><strong>infrastructure:</strong> persistence, adapters</li>
+<li><strong>api:</strong> controllers</li>
+</ul>
+<p>A module owns its tables. Other modules read them only through the module's query interface or events.</p>
+<div class="diagram"><pre class="mermaid">flowchart LR
+  subgraph Foundation
+    IAM2[M1 Identity &amp; Access]
+    CAT[M2 Academic Catalogue]
+    PRG[M3 Programme &amp; Regulations]
+    CAL[M4 Academic Calendar]
+  end
+  subgraph Student Lifecycle
+    SR[M5 Student Records]
+    REGM[M6 Course Registration]
+    ATT[M7 Attendance]
+    SELM[M8 Selections &amp; Progression]
+  end
+  subgraph Assessment
+    ASM[M9 Assessment &amp; Results]
+    EXO[M10 Examination Operations]
+    AWD[M11 Degree Audit &amp; Awards]
+  end
+  subgraph Services
+    REQM[M12 Requests &amp; Appeals]
+    PAYM[M13 Payments]
+    DOC[M14 Documents]
+    NOT[M15 Notifications]
+  end
+  subgraph Insight
+    RPT[M16 Reports &amp; Schedules]
+    ANL[M17 Analytics]
+  end
+  INT[M18 Integration Hub]
+
+  CAT --&gt; PRG
+  PRG --&gt; SR
+  CAL --&gt; REGM
+  SR --&gt; REGM --&gt; ASM --&gt; AWD
+  REGM --&gt; ATT --&gt; ASM
+  ASM --&gt; SELM
+  PRG -. rules .-&gt; SELM &amp; AWD &amp; REGM
+  REGM &amp; ASM &amp; SELM &amp; AWD &amp; REQM --&gt; NOT
+  REQM --&gt; PAYM
+  REGM --&gt; PAYM
+  AWD &amp; EXO &amp; REQM --&gt; DOC
+  ASM --&gt; EXO
+  RPT &amp; ANL -. read .-&gt; SR &amp; REGM &amp; ASM
+  INT &lt;--&gt; SR &amp; ASM &amp; PAYM &amp; NOT
+</pre></div>
+<h3 id="m1-identity-access">M1 Identity &amp; Access</h3>
+<ul>
+<li><strong>Purpose:</strong> authenticate users, and authorise every action by role and <strong>scope</strong>.</li>
+<li><strong>Key concepts:</strong></li>
+<li><code>User</code> is linked to the person record (student or staff).</li>
+<li><code>Role</code>: Student, Lecturer, FirstExaminer, SecondExaminer, HoD, Dean, ProgrammeCoordinator, ProjectCoordinator, ExamBranchOfficer, FacultyOfficer, Invigilator, SystemAdmin.</li>
+<li><code>Grant</code> = role + scope. A scope is a department, programme, course offering or exam session.</li>
+<li><strong>Behaviour:</strong></li>
+<li>Uses SSO through OIDC, with MFA for HoD, Dean, Exam Branch and Admin.</li>
+<li>Password reset is delegated to the identity provider.</li>
+<li>Examiner grants are created automatically when examiners are assigned to an offering (<span class="rid">PS-04</span>).</li>
+<li>Suspended or withheld students keep <strong>read</strong> access and lose registration and exam actions (<span class="rid">REG-12</span>, <span class="rid">EXM-12</span>).</li>
+<li><strong>Requirements:</strong> <span class="rid">REG-14</span>, <span class="rid">REG-12</span>, <span class="rid">EXM-12</span> (enforcement), <span class="rid">PS-04</span>.</li>
+</ul>
+<h3 id="m2-academic-catalogue">M2 Academic Catalogue</h3>
+<ul>
+<li><strong>Purpose:</strong> the master list of subjects and course units, and the dependencies between units.</li>
+<li><strong>Key concepts:</strong></li>
+<li><code>Subject</code> (AMAT, PHYS, …) with its owning <code>Department</code> and a practical-component flag.</li>
+<li><code>CourseUnit</code>, versioned by <code>CurriculumEdition</code>: code, title, level, semester code, credits, GPA flag, owning department, offering faculty (for other-faculty units).</li>
+<li><code>Requisite</code>: typed as <code>UNIT_PREREQ</code>, <code>COREQ</code>, <code>AL_SUBJECT</code>, <code>GROUP</code> (for example, all compulsory PHYS units at Levels 1–2), or <code>EXCLUSION</code> (for example, not available with ELEC).</li>
+<li><strong>Behaviour:</strong></li>
+<li>Parses and validates codes.</li>
+<li>Builds and checks the prerequisite graph: no cycles, all referenced codes exist. This would catch handbook errors such as ELEC 22513 being referenced but never defined.</li>
+<li>Holds units offered by other faculties, flagged as external (<span class="rid">REG-15</span>).</li>
+<li><strong>Requirements:</strong> <span class="rid">REG-03</span> (requisite data), <span class="rid">REG-07</span> (semester data), <span class="rid">REG-15</span>.</li>
+</ul>
+<h3 id="m3-programme-regulations">M3 Programme &amp; Regulations</h3>
+<ul>
+<li><strong>Purpose:</strong> define <em>what a degree is</em> and <em>what it takes</em>.</li>
+<li><strong>Key concepts:</strong></li>
+<li><code>Programme</code> (BSc, BSc Hons Zoology, …), versioned by <code>ProgrammeEdition</code>.</li>
+<li><code>Stream</code> (BS, PS).</li>
+<li><code>Pathway</code>: a combination, path, track, specialisation or domain.</li>
+<li><code>StructureFragment</code>: a set of <code>StructureEntry</code> records (unit, year, semester, C/O/A, note).</li>
+<li><code>RuleSet</code>, of kind Gate, Award, Class, Progression, RegistrationConstraint or Exit, written in the regulations language (B5.1).</li>
+<li><strong>Behaviour:</strong></li>
+<li>Composes a student's <strong>study-plan template</strong> from fragments: for example, combination BS 4 for Y1–2 plus Honours column 4 for Y3–4.</li>
+<li>Publishes immutable editions; a new handbook year means a new edition.</li>
+<li>Admin screens let staff author and test rule sets against sample records.</li>
+<li><strong>Requirements:</strong> <span class="rid">EXM-10</span> (rule definitions), <span class="rid">REG-09</span> (credit rules), <span class="rid">SEL-01…06</span> (gate definitions).</li>
+</ul>
+<h3 id="m4-academic-calendar-scheduling">M4 Academic Calendar &amp; Scheduling</h3>
+<ul>
+<li><strong>Purpose:</strong> time-bound windows and timetables.</li>
+<li><strong>Key concepts:</strong></li>
+<li><code>AcademicYear</code>, <code>Semester</code>.</li>
+<li><code>Window</code>, typed as Registration, AddDrop, RepeatRegistration, Selection, MarkEntry, Appeal or DocumentRequest, each with open and close times and a scope.</li>
+<li><code>Timetable</code> slots for lectures and labs.</li>
+<li><code>ExamTimetable</code>.</li>
+<li><strong>Behaviour:</strong></li>
+<li>Opens and closes windows automatically; the add/drop window is 2 weeks (§1.7).</li>
+<li>Detects clashes between lecture slots and between exam slots.</li>
+<li><strong>Requirements:</strong> <span class="rid">PS-02</span>, <span class="rid">PS-03</span>, <span class="rid">REG-07</span>, <span class="rid">EXM-14</span>.</li>
+</ul>
+<h3 id="m5-student-records">M5 Student Records</h3>
+<ul>
+<li><strong>Purpose:</strong> the student as a person and as an academic entity.</li>
+<li><strong>Key concepts:</strong></li>
+<li><code>Student</code>: personal details (REG-06).</li>
+<li><code>RegistrationNumber</code>, with history and aliases.</li>
+<li><code>Intake</code>/<code>Batch</code>, with a <code>CurriculumEdition</code> pin.</li>
+<li><code>ProgrammeEnrolment</code>: programme, pathway, start and end, status.</li>
+<li><code>StudentStatus</code>: Active, Suspended, Deferred, Withheld, Cancelled, Transferred, Graduated, Exited.</li>
+<li><strong>Behaviour:</strong></li>
+<li>Imports the intake from the UGC list.</li>
+<li>Re-keys a registration number by issuing a new number and keeping the old one as an alias. Results move atomically with an audit entry (<span class="rid">REG-08</span>, <span class="rid">EXM-09</span>).</li>
+<li>Status transitions carry a reason and the authority who made them (<span class="rid">REG-11</span>, <span class="rid">REG-12</span>).</li>
+<li>Tracks the degree validity date and the start of the time-limit clock.</li>
+<li><strong>Requirements:</strong> <span class="rid">REG-06</span>, <span class="rid">REG-08</span>, <span class="rid">REG-11</span>, <span class="rid">REG-12</span>, <span class="rid">EXM-09</span>, <span class="rid">SCH-07</span>.</li>
+</ul>
+<h3 id="m6-course-registration">M6 Course Registration</h3>
+<ul>
+<li><strong>Purpose:</strong> students choose units each year or semester; the system validates every choice.</li>
+<li><strong>Key concepts:</strong></li>
+<li><code>Offering</code>: a unit in a semester, with capacity, coordinator and examiners.</li>
+<li><code>Enrolment</code>: student and offering.<ul>
+<li>Attempt type: Proper, Repeat, Medical or Deferred.</li>
+<li>Status: Registered, Dropped or Cancelled.</li>
+</ul>
+</li>
+<li><strong>Behaviour:</strong></li>
+<li>A <strong>validation pipeline</strong> runs in-process on every registration and add/drop request:<ol>
+<li>the window is open</li>
+<li>the student's status allows registration</li>
+<li>the unit is in the student's structure (C/O/A) or is an allowed auxiliary unit</li>
+<li>requisites are met: prerequisite passed, co-requisite in the same request, A/L subject held, group rule met</li>
+<li>there are no timetable clashes</li>
+<li>credit-load rules hold: the yearly minimum, and the other-faculty cap</li>
+<li>capacity is available</li>
+</ol>
+</li>
+<li>Compulsory units are pre-filled. Repeat and medical attempts are shown separately (<span class="rid">REG-10</span>).</li>
+<li>Supports bulk transfer when a module is replaced, and deferral to the next year (<span class="rid">REG-05</span>, <span class="rid">REG-16</span>).</li>
+<li>Repeat and medical registration needs a payment (<span class="rid">REG-04</span>).</li>
+<li>Produces class rolls (<span class="rid">REG-17</span>).</li>
+<li><strong>Requirements:</strong> <span class="rid">REG-01…05</span>, <span class="rid">REG-07</span>, <span class="rid">REG-09</span>, <span class="rid">REG-10</span>, <span class="rid">REG-15</span>, <span class="rid">REG-16</span>, <span class="rid">REG-17</span>, <span class="rid">PS-03</span>.</li>
+</ul>
+<h3 id="m7-attendance">M7 Attendance</h3>
+<ul>
+<li><strong>Purpose:</strong> class, lab and exam attendance.</li>
+<li><strong>Key concepts:</strong> <code>Session</code> (lecture, lab, exam), <code>AttendanceRecord</code>.</li>
+<li><strong>Behaviour:</strong></li>
+<li>Generates attendance sheets.</li>
+<li>Supports bulk upload or tick-entry.</li>
+<li>Records exam attendance after the exam (<span class="rid">EXM-16</span>).</li>
+<li>Computes lab attendance percentage for the grade cap (A2.3).</li>
+<li><strong>Requirements:</strong> <span class="rid">REG-18</span>, <span class="rid">EXM-16</span>, PS (generate and update attendance sheets).</li>
+</ul>
+<h3 id="m8-selections-progression">M8 Selections &amp; Progression</h3>
+<ul>
+<li><strong>Purpose:</strong> any process where students state preferences or are ranked into pathways, Honours, specialisations or supervisors.</li>
+<li><strong>Key concepts:</strong></li>
+<li><code>SelectionRound</code>: type, window, eligible population, options.</li>
+<li><code>Option</code>: with capacity.</li>
+<li><code>Preference</code>: ranked choices from a student.</li>
+<li><code>RankingPolicy</code>: which GPA scope, and the tie-breaks.</li>
+<li><code>GateRuleSet</code>: from M3.</li>
+<li><code>Allocation</code>, which is then approved and published.</li>
+<li><strong>Behaviour:</strong> a round runs in five steps.
+  1. Open the round.
+  2. Students rank their options.
+  3. Check each student against the gates.
+  4. Rank the eligible students.
+  5. Allocate places within capacity, using serial dictatorship by rank.</li>
+</ul>
+<p>After that, the coordinator or HoD reviews the allocation, it is approved and published, students are notified, and the study plan is updated.
+- <strong>Used for:</strong>
+  - BS subject allocation (Y1 S2) and PS subject allocation (Y1)
+  - MIT vs IT (end of Y1) and MIT specialisation (end of Y2)
+  - BECS specialisation and merit Honours (end of Y2)
+  - SENG domain
+  - BSSS supervisor allocation (<span class="rid">PS-06</span>)
+- <strong>Also:</strong> progression checks, such as BSSS GPA &gt; 2.0 (<span class="rid">PS-05</span>), and Dean's list generation (<span class="rid">SEL-04</span>).
+- <strong>Requirements:</strong> <span class="rid">SEL-01…06</span>, <span class="rid">PS-05</span>, <span class="rid">PS-06</span>, <span class="rid">PS-08</span>, <span class="rid">SEL-04</span>.</p>
+<h3 id="m9-assessment-results">M9 Assessment &amp; Results</h3>
+<ul>
+<li><strong>Purpose:</strong> turn marks into approved, released grades.</li>
+<li><strong>Key concepts:</strong></li>
+<li><code>AssessmentScheme</code> per offering: components (CA, practical, final exam) with weights. Up to 10% may be lecture attendance.</li>
+<li><code>MarkEntry</code>.</li>
+<li><code>ResultSheet</code> per offering and exam session, with a state machine (B7.2).</li>
+<li><code>Grade</code>: marks → grade → grade point.</li>
+<li><code>ResultAmendment</code>.</li>
+<li><strong>Behaviour:</strong></li>
+<li>First examiner enters marks; second examiner verifies; HoD recommends; Dean approves; results are released.</li>
+<li>Deadlines drive reminders (<span class="rid">EXM-02</span>, <span class="rid">EXM-17</span>).</li>
+<li>Grade policies are applied in order:<ol>
+<li>the repeat cap at C, keeping the better grade</li>
+<li>the lab-attendance cap</li>
+<li>absent counts as 0</li>
+<li>medical attempts graded as proper attempts</li>
+</ol>
+</li>
+<li>Released results are pushed to students in real time and transferred to the University exam system.</li>
+<li>Results can be withheld (<span class="rid">EXM-12</span>).</li>
+<li><strong>Requirements:</strong> <span class="rid">EXM-01</span>, <span class="rid">EXM-02</span>, <span class="rid">EXM-05</span>, <span class="rid">EXM-12</span>, <span class="rid">EXM-17</span>, <span class="rid">EXM-18</span>, <span class="rid">PS-04</span>.</li>
+</ul>
+<h3 id="m10-examination-operations">M10 Examination Operations</h3>
+<ul>
+<li><strong>Purpose:</strong> running exams.</li>
+<li><strong>Key concepts:</strong> <code>ExamSession</code>, <code>ExamSlot</code>, <code>Venue</code> (with capacity), <code>HallAllocation</code>, <code>DutyRoster</code> (supervisor, invigilator, hall attendant), <code>AdmissionCard</code>, <code>ExamDocumentPack</code>.</li>
+<li><strong>Behaviour:</strong></li>
+<li>Builds the exam timetable without clashes (<span class="rid">EXM-14</span>).</li>
+<li>Allocates halls by headcount (<span class="rid">EXM-07</span>).</li>
+<li>Generates duty rosters fairly, balancing load (<span class="rid">EXM-08</span>).</li>
+<li>Issues admission cards only to eligible students; holds them where University admin registration is incomplete (<span class="rid">EXM-06</span>, <span class="rid">EXM-15</span>).</li>
+<li>Produces the document pack per exam: attendance, mark, first-examiner, second-examiner and moderation sheets (<span class="rid">EXM-13</span>).</li>
+<li><strong>Requirements:</strong> <span class="rid">EXM-06</span>, <span class="rid">EXM-07</span>, <span class="rid">EXM-08</span>, <span class="rid">EXM-13</span>, <span class="rid">EXM-14</span>, <span class="rid">EXM-15</span>.</li>
+</ul>
+<h3 id="m11-degree-audit-awards">M11 Degree Audit &amp; Awards</h3>
+<ul>
+<li><strong>Purpose:</strong> answer "has this student met the degree requirements, and with what class?" at any time.</li>
+<li><strong>Key concepts:</strong> <code>DegreeAudit</code>, a snapshot of a rules-engine evaluation with its explanation; <code>AwardDecision</code>; <code>PassList</code>; <code>ExitRequest</code> (early exit, fallback, revert).</li>
+<li><strong>Behaviour:</strong></li>
+<li>Runs a live audit for students: "you need 6 more C-or-better credits at Level 4" (<span class="rid">EXM-10</span>).</li>
+<li>Batch audits for final-year cohorts produce the final results sheet and the pass list by degree (<span class="rid">REQ-04</span>, <span class="rid">EXM-11</span>).</li>
+<li>Handles exit and fallback requests (<span class="rid">REQ-05</span>, <span class="rid">REQ-06</span>).</li>
+<li>Monitors time limits and notifies students when five years have passed (<span class="rid">REG-13</span>).</li>
+<li><strong>Requirements:</strong> <span class="rid">EXM-10</span>, <span class="rid">EXM-11</span>, <span class="rid">REQ-04</span>, <span class="rid">REQ-05</span>, <span class="rid">REQ-06</span>, <span class="rid">REG-13</span>.</li>
+</ul>
+<h3 id="m12-requests-appeals">M12 Requests &amp; Appeals</h3>
+<ul>
+<li><strong>Purpose:</strong> student-initiated cases.</li>
+<li><strong>Key concepts:</strong> <code>Request</code> (type, payload, attachments, fee), <code>CaseWorkflow</code> (configurable steps and approvers), <code>Decision</code>.</li>
+<li><strong>Types:</strong></li>
+<li>exam deferment appeal (<span class="rid">REQ-01</span>)</li>
+<li>other appeals</li>
+<li>MOI letter (<span class="rid">REQ-02</span>)</li>
+<li>interim or detailed results sheet, transcript (<span class="rid">REQ-03</span>)</li>
+<li>Dean's list letter (<span class="rid">SEL-04</span>)</li>
+<li>five-year appeal (<span class="rid">REG-13</span>)</li>
+<li><strong>Behaviour:</strong> a request goes through submit → pay, if a fee applies → review → decide → fulfil, which generates the document through M14.</li>
+</ul>
+<h3 id="m13-payments">M13 Payments</h3>
+<ul>
+<li><strong>Purpose:</strong> collect fees online.</li>
+<li><strong>Key concepts:</strong> <code>FeeSchedule</code> (item, amount, edition), <code>PaymentIntent</code>, <code>Transaction</code>, <code>Receipt</code>.</li>
+<li><strong>Behaviour:</strong></li>
+<li>Uses a gateway adapter.</li>
+<li>Payment confirmation is idempotent, driven by a callback or webhook.</li>
+<li>Runs a daily reconciliation report.</li>
+<li>Payment unlocks the dependent action: repeat registration, or document issue.</li>
+<li><strong>Requirements:</strong> <span class="rid">REG-04</span>, <span class="rid">REQ-03</span>.</li>
+</ul>
+<h3 id="m14-documents">M14 Documents</h3>
+<ul>
+<li><strong>Purpose:</strong> every generated or uploaded document.</li>
+<li><strong>Key concepts:</strong></li>
+<li><code>Template</code>, versioned, in HTML with data bindings.</li>
+<li><code>IssuedDocument</code>: a number, a hash and a QR verification link.</li>
+<li><code>Upload</code>: medical certificates and appeal attachments.</li>
+<li><strong>Outputs:</strong></li>
+<li>admission cards</li>
+<li>attendance and mark sheets</li>
+<li>class rolls</li>
+<li>pass lists</li>
+<li>final results sheets</li>
+<li>MOI and Dean's list letters</li>
+<li>interim and detailed results sheets</li>
+<li>transcripts (<span class="rid">PS-07</span>)</li>
+<li><strong>Verification:</strong> a public endpoint checks issued documents.</li>
+</ul>
+<h3 id="m15-notifications">M15 Notifications</h3>
+<ul>
+<li><strong>Purpose:</strong> send messages on every channel.</li>
+<li><strong>Key concepts:</strong> <code>Template</code>, <code>Channel</code> (email, SMS, in-app), <code>Subscription</code>, <code>ScheduledReminder</code>.</li>
+<li><strong>Behaviour:</strong></li>
+<li>Consumes domain events through the outbox.</li>
+<li>Recurring reminders: weekly reminders to examiners past their deadline (<span class="rid">EXM-17</span>), pending-status reminders to the first and second examiner (<span class="rid">EXM-05</span>), selection results (<span class="rid">PS-06</span>).</li>
+<li>Credit-adequacy alerts (<span class="rid">REG-09</span>) and time-limit notices (<span class="rid">REG-13</span>).</li>
+</ul>
+<h3 id="m16-reports-schedules">M16 Reports &amp; Schedules</h3>
+<ul>
+<li><strong>Purpose:</strong> operational lists and summaries.</li>
+<li><strong>Behaviour:</strong> a parameterised report catalogue on the read replica, exported as CSV, XLSX or PDF. Report families:</li>
+<li>module rosters (<span class="rid">SCH-01</span>, <span class="rid">SCH-02</span>)</li>
+<li>clash lists (<span class="rid">SCH-03</span>)</li>
+<li>student academic records (<span class="rid">SCH-04</span>)</li>
+<li>proper vs repeat counts (<span class="rid">SCH-05</span>)</li>
+<li>year-of-study summaries (<span class="rid">SCH-06</span>, <span class="rid">SCH-07</span>)</li>
+<li>pathway summaries (<span class="rid">SCH-08</span>)</li>
+<li>exam vs results-release dates (<span class="rid">EXM-03</span>)</li>
+<li>unreleased results by department or programme (<span class="rid">EXM-04</span>)</li>
+</ul>
+<h3 id="m17-analytics">M17 Analytics</h3>
+<ul>
+<li><strong>Purpose:</strong> descriptive, diagnostic and predictive insight.</li>
+<li><strong>Behaviour:</strong></li>
+<li>A nightly ETL builds a star schema: facts are enrolment, mark, grade and attendance; dimensions are student, unit, programme, year and department.</li>
+<li><strong>Descriptive:</strong> module results, attendance, CA distributions (<span class="rid">ANA-01</span>).</li>
+<li><strong>Diagnostic:</strong> GPA, comparisons, pass rates (<span class="rid">ANA-02</span>).</li>
+<li><strong>Predictive:</strong> five-year trends, enrolment forecasts, at-risk flags (<span class="rid">ANA-03</span>).</li>
+<li>Uses a BI tool for dashboards, and offline Python jobs for prediction models.</li>
+<li>Data is pseudonymised outside role-scoped views.</li>
+</ul>
+<h3 id="m18-integration-hub">M18 Integration Hub</h3>
+<ul>
+<li><strong>Purpose:</strong> isolate external systems behind adapters.</li>
+<li><strong>Adapters:</strong></li>
+<li>UGC intake import</li>
+<li>University admin-registration status, which feeds the <span class="rid">EXM-06</span> hold</li>
+<li>University exam system result transfer (<span class="rid">EXM-05</span>)</li>
+<li>payment gateway</li>
+<li>email and SMS</li>
+<li>identity provider</li>
+<li>other faculties' offering feed (<span class="rid">REG-15</span>)</li>
+<li><strong>Pattern:</strong></li>
+<li>Outbound calls go through the outbox, with retries and a dead-letter queue.</li>
+<li>Inbound calls are signed webhooks or scheduled pulls.</li>
+<li>Every exchange is logged.</li>
+</ul>
+<h2 id="b5-cross-cutting-components">B5. Cross-cutting components</h2>
+<h3 id="b51-rules-engine-and-regulations-language">B5.1 Rules engine and regulations language</h3>
+<p>This is the heart of the system. Rules are <strong>declarative documents</strong> (YAML or JSON) that are versioned with the programme edition and evaluated against an <code>AcademicRecord</code>. The record holds attempts, grades, credits, levels, years, structure statuses, attendance and dates.</p>
+<p>Building blocks:</p>
+<ul>
+<li><strong>Scopes</strong>, which select units: by subject, level, year, status, list of units, specialisation, or GPA flag.</li>
+<li><strong>Predicates</strong>:</li>
+<li><code>minCredits(scope, gradeAtLeast)</code></li>
+<li><code>maxCredits(scope, grades)</code></li>
+<li><code>noGrade(scope, grade)</code></li>
+<li><code>gpaAtLeast(scope, value)</code></li>
+<li><code>shareAtLeast(scope, gradeAtLeast, fraction)</code></li>
+<li><code>perPeriod(minCredits, by: year | slqf)</code></li>
+<li><code>unitGrade(unit, gradeAtLeast)</code></li>
+<li><code>anyOf</code> / <code>allOf</code></li>
+<li><code>withinYears(n)</code></li>
+<li><code>pickFrom(group, minCredits)</code></li>
+<li><strong>Outcome:</strong> a pass or fail per node, plus figures such as <em>have 64 / need 72</em>. This gives the explanation tree that students and staff see.</li>
+</ul>
+<p>Example: the Zoology Honours gate, from §1.5.2 (xv):</p>
+<pre><code class="language-yaml">ruleset: gate.hons.zoology
+edition: 2023/24
+allOf:
+  - gpaAtLeast: { scope: all.y1-2, value: 3.00 }
+  - unitsAtLeast: { scope: subject(ZOOL).compulsory.y1-2, grade: C }
+  - maxCredits: { scope: all.y1-2, grades: [D, D+, C-], max: 8 }
+  - noGrade: { scope: all.y1-2, grade: E }
+  - minCredits:
+      scope: union(subject(ZOOL).compulsory.y1-2, units[BIOL 11552, BIOL 11512, BIOL 11522])
+      gradeAtLeast: B
+      min: 20
+</code></pre>
+<p>The same engine evaluates:</p>
+<ul>
+<li>award eligibility and classes (§2.5–2.15)</li>
+<li>selection gates</li>
+<li>progression rules (<span class="rid">PS-05</span>)</li>
+<li>registration constraints, such as the yearly credit minimum and the other-faculty cap</li>
+</ul>
+<p>Rule sets are tested with <strong>golden test cases</strong> written from handbook examples. For instance, the §2.4 GPA example must give 2.48.</p>
+<h3 id="b52-workflow-engine">B5.2 Workflow engine</h3>
+<p>A small state-machine library is used for:</p>
+<ul>
+<li>result sheets</li>
+<li>requests and appeals</li>
+<li>selection rounds</li>
+<li>exit requests</li>
+<li>status changes</li>
+</ul>
+<p>Each transition has guards (role and scope, data checks), actions (emit an event, notify), and timers that drive deadlines and reminders.</p>
+<h3 id="b53-audit-and-compliance">B5.3 Audit and compliance</h3>
+<ul>
+<li>An append-only audit log records who did what, when, before and after, and why. It covers marks, grades, approvals, registration-number changes, status changes and rule-set publishing.</li>
+<li>Released grades are never overwritten. A change creates an <strong>amendment</strong> with its authority.</li>
+</ul>
+<h3 id="b54-other-cross-cutting-concerns">B5.4 Other cross-cutting concerns</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Security</strong></td>
+<td>OWASP ASVS L2 baseline: CSRF protection, input validation, scoped authorisation on every endpoint, field-level protection for personal data</td>
+</tr>
+<tr>
+<td><strong>Configuration</strong></td>
+<td>Fee schedules, windows, deadlines (3 weeks and 1 week are marked "to be verified") and caps are held as configuration, not code</td>
+</tr>
+<tr>
+<td><strong>Observability</strong></td>
+<td>Structured logs, metrics and traces. Business metrics include registrations per minute and overdue result sheets</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="b6-core-data-model">B6. Core data model</h2>
+<div class="diagram"><pre class="mermaid">erDiagram
+  CURRICULUM_EDITION ||--o{ PROGRAMME_EDITION : contains
+  PROGRAMME ||--o{ PROGRAMME_EDITION : versions
+  PROGRAMME_EDITION ||--o{ PATHWAY : offers
+  PATHWAY ||--o{ STRUCTURE_FRAGMENT : &quot;composed of&quot;
+  STRUCTURE_FRAGMENT ||--o{ STRUCTURE_ENTRY : lists
+  COURSE_UNIT ||--o{ STRUCTURE_ENTRY : &quot;appears in (C/O/A)&quot;
+  COURSE_UNIT ||--o{ REQUISITE : has
+  SUBJECT ||--o{ COURSE_UNIT : groups
+  DEPARTMENT ||--o{ SUBJECT : owns
+  PROGRAMME_EDITION ||--o{ RULE_SET : &quot;governed by&quot;
+
+  STUDENT ||--o{ REGISTRATION_NUMBER : &quot;known as&quot;
+  STUDENT ||--o{ PROGRAMME_ENROLMENT : follows
+  PROGRAMME_ENROLMENT }o--|| PATHWAY : &quot;on&quot;
+  STUDENT ||--|| STUDY_PLAN : has
+  STUDENT ||--o{ STATUS_EVENT : history
+
+  ACADEMIC_YEAR ||--o{ SEMESTER : has
+  SEMESTER ||--o{ OFFERING : runs
+  COURSE_UNIT ||--o{ OFFERING : &quot;offered as&quot;
+  OFFERING ||--o{ ENROLMENT : has
+  STUDENT ||--o{ ENROLMENT : makes
+  OFFERING ||--o{ EXAMINER_ASSIGNMENT : &quot;examined by&quot;
+  OFFERING ||--|| ASSESSMENT_SCHEME : uses
+  OFFERING ||--o{ RESULT_SHEET : produces
+  RESULT_SHEET ||--o{ MARK_ENTRY : contains
+  ENROLMENT ||--o| GRADE : earns
+  GRADE ||--o{ RESULT_AMENDMENT : &quot;amended by&quot;
+
+  SELECTION_ROUND ||--o{ SELECTION_OPTION : offers
+  SELECTION_ROUND ||--o{ PREFERENCE : collects
+  SELECTION_ROUND ||--o{ ALLOCATION : yields
+
+  EXAM_SESSION ||--o{ EXAM_SLOT : schedules
+  EXAM_SLOT ||--o{ HALL_ALLOCATION : uses
+  EXAM_SLOT ||--o{ DUTY_ASSIGNMENT : staffs
+  STUDENT ||--o{ ADMISSION_CARD : receives
+
+  STUDENT ||--o{ REQUEST : submits
+  REQUEST ||--o{ PAYMENT : &quot;paid by&quot;
+  REQUEST ||--o{ ISSUED_DOCUMENT : fulfils
+  STUDENT ||--o{ DEGREE_AUDIT : evaluated
+</pre></div>
+<h2 id="b7-key-flows">B7. Key flows</h2>
+<h3 id="b71-course-registration-with-validation">B7.1 Course registration with validation</h3>
+<div class="diagram"><pre class="mermaid">sequenceDiagram
+  actor S as Student
+  participant UI as Web app
+  participant REG as M6 Registration
+  participant PRG as M3 Programme &amp; Rules
+  participant CAT as M2 Catalogue
+  participant CAL as M4 Calendar
+  participant PAY as M13 Payments
+  S-&gt;&gt;UI: Select units for the year
+  UI-&gt;&gt;REG: POST /registrations (draft)
+  REG-&gt;&gt;CAL: Is the window open for this student's batch?
+  REG-&gt;&gt;PRG: Study plan and statuses (C/O/A) for the student
+  REG-&gt;&gt;CAT: Requisites for the selected units
+  REG-&gt;&gt;REG: Check requisites, clashes, capacity
+  REG-&gt;&gt;PRG: Evaluate registration constraints (credits/year, other-faculty cap)
+  REG--&gt;&gt;UI: Result with blocking errors and warnings (&quot;credits below 30&quot;, REG-09)
+  S-&gt;&gt;UI: Confirm
+  alt includes repeat or medical attempts
+    REG-&gt;&gt;PAY: Create payment intent
+    PAY--&gt;&gt;S: Redirect to gateway
+    PAY-&gt;&gt;REG: payment.confirmed (event)
+  end
+  REG-&gt;&gt;REG: Commit enrolments (transaction)
+  REG--&gt;&gt;S: Confirmation and class rolls updated
+</pre></div>
+<h3 id="b72-result-sheet-lifecycle-exm-05">B7.2 Result sheet lifecycle (<span class="rid">EXM-05</span>)</h3>
+<div class="diagram"><pre class="mermaid">stateDiagram-v2
+  [*] --&gt; Draft: offering starts, examiners assigned
+  Draft --&gt; AttendanceUpdated: exam attendance recorded
+  AttendanceUpdated --&gt; CriteriaSet: CA/practical/final weights confirmed
+  CriteriaSet --&gt; FirstEntered: 1st examiner submits (deadline 3 weeks*)
+  FirstEntered --&gt; SecondVerified: 2nd examiner verifies or edits (deadline 1 week*)
+  SecondVerified --&gt; FirstEntered: returned with comments
+  SecondVerified --&gt; HoDRecommended: HoD recommends
+  HoDRecommended --&gt; SecondVerified: HoD returns
+  HoDRecommended --&gt; DeanApproved: Dean approves
+  DeanApproved --&gt; Released: release to students and exam system
+  Released --&gt; Amended: approved amendment
+  Amended --&gt; Released
+  note right of FirstEntered: Overdue sheets trigger pending-status emails and weekly reminders (EXM-17)
+</pre></div>
+<p>* Durations are configuration values, marked "to be verified" in the template.</p>
+<h3 id="b73-selection-round-honours-example">B7.3 Selection round (Honours example)</h3>
+<div class="diagram"><pre class="mermaid">sequenceDiagram
+  participant FO as Faculty Office
+  participant SEL as M8 Selections
+  participant RUL as Rules engine
+  participant S as Students
+  participant HOD as HoD / Coordinator
+  FO-&gt;&gt;SEL: Create round &quot;Honours 2025&quot; (options, capacities, window)
+  SEL-&gt;&gt;S: Notify eligible cohort
+  S-&gt;&gt;SEL: Submit ranked preferences
+  SEL-&gt;&gt;RUL: Evaluate the gate per student and option
+  RUL--&gt;&gt;SEL: Pass or fail, with explanation
+  SEL-&gt;&gt;SEL: Rank eligible students (policy), allocate by capacity
+  SEL-&gt;&gt;HOD: Review the provisional list (override with reason)
+  HOD-&gt;&gt;SEL: Approve
+  SEL-&gt;&gt;S: Publish the outcome (study plans switch to the Honours structure)
+</pre></div>
+<h2 id="b8-requirement-traceability">B8. Requirement traceability</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Primary module</th>
+<th>Supporting</th>
+<th>How it is handled</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="rid">REG-01</span>, <span class="rid">REG-02</span></td>
+<td>M6</td>
+<td>M3, M4</td>
+<td>Annual and semester registration in windows; compulsory units pre-filled from the study plan</td>
+</tr>
+<tr>
+<td><span class="rid">REG-03</span></td>
+<td>M6</td>
+<td>M2</td>
+<td>Validation pipeline step 4 (requisites) for <strong>all</strong> programmes, not only MIT/IT</td>
+</tr>
+<tr>
+<td><span class="rid">REG-04</span></td>
+<td>M6</td>
+<td>M13</td>
+<td>Repeat or medical attempt requires a confirmed payment</td>
+</tr>
+<tr>
+<td><span class="rid">REG-05</span></td>
+<td>M6</td>
+<td>M2, M15</td>
+<td>Replace offering → bulk transfer of enrolments → notify</td>
+</tr>
+<tr>
+<td><span class="rid">REG-06</span></td>
+<td>M5</td>
+<td>M1</td>
+<td>Profile, with controlled self-edit plus staff edit, audited</td>
+</tr>
+<tr>
+<td><span class="rid">REG-07</span></td>
+<td>M4</td>
+<td>M6, M16</td>
+<td>Timetable clash check; clash report (<span class="rid">SCH-03</span>)</td>
+</tr>
+<tr>
+<td><span class="rid">REG-08</span>, <span class="rid">EXM-09</span></td>
+<td>M5</td>
+<td>M9, B5.3</td>
+<td>Registration-number re-key with alias; audited move of results</td>
+</tr>
+<tr>
+<td><span class="rid">REG-09</span></td>
+<td>M6</td>
+<td>M3</td>
+<td>Credit-load rules evaluated live as warnings or blocks</td>
+</tr>
+<tr>
+<td><span class="rid">REG-10</span></td>
+<td>M6</td>
+<td>UI</td>
+<td>Separate repeat/medical panel with credits still required</td>
+</tr>
+<tr>
+<td><span class="rid">REG-11</span>, <span class="rid">REG-12</span></td>
+<td>M5</td>
+<td>M1</td>
+<td>Status transitions; authorisation enforcement</td>
+</tr>
+<tr>
+<td><span class="rid">REG-13</span></td>
+<td>M11</td>
+<td>M15, M12</td>
+<td>Time-limit monitor → notice → appeal request</td>
+</tr>
+<tr>
+<td><span class="rid">REG-14</span></td>
+<td>M1</td>
+<td>UI, M9, M10</td>
+<td>Portal: SSO, results, final results, admission</td>
+</tr>
+<tr>
+<td><span class="rid">REG-15</span></td>
+<td>M2</td>
+<td>M6, M18</td>
+<td>External-unit flag; grouped in the UI</td>
+</tr>
+<tr>
+<td><span class="rid">REG-16</span></td>
+<td>M6</td>
+<td>M5</td>
+<td>Deferral moves the enrolment to the next year's offering</td>
+</tr>
+<tr>
+<td><span class="rid">REG-17</span></td>
+<td>M6</td>
+<td>M14</td>
+<td>Class roll documents</td>
+</tr>
+<tr>
+<td><span class="rid">REG-18</span></td>
+<td>M7</td>
+<td></td>
+<td>Attendance capture</td>
+</tr>
+<tr>
+<td><span class="rid">REQ-01…06</span></td>
+<td>M12</td>
+<td>M13, M14, M11</td>
+<td>Case workflows; paid documents; exit requests</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-01</span></td>
+<td>M9</td>
+<td>M3</td>
+<td>Grade policy, corrected in C2</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-02</span>, <span class="rid">EXM-17</span></td>
+<td>M9</td>
+<td>M15</td>
+<td>Examiner assignment, deadlines and reminders</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-03</span>, <span class="rid">EXM-04</span></td>
+<td>M16</td>
+<td>M9, M10</td>
+<td>Release-timing and backlog reports</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-05</span>, <span class="rid">EXM-18</span></td>
+<td>M9</td>
+<td>B5.2, M18</td>
+<td>Result sheet state machine (B7.2)</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-06</span></td>
+<td>M10</td>
+<td>M18</td>
+<td>Admission hold from the University registration feed</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-07</span>, <span class="rid">EXM-08</span></td>
+<td>M10</td>
+<td></td>
+<td>Hall allocation and duty rosters</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-10</span></td>
+<td>M11</td>
+<td>B5.1</td>
+<td>Live degree audit with explanation</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-11</span></td>
+<td>M11</td>
+<td>M14</td>
+<td>Pass list by degree</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-12</span></td>
+<td>M9</td>
+<td>M5, M1</td>
+<td>Withhold flag hides results and blocks registration</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-13</span></td>
+<td>M10</td>
+<td>M14</td>
+<td>Exam document pack</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-14</span></td>
+<td>M4</td>
+<td>M10</td>
+<td>Exam timetable</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-15</span></td>
+<td>M10</td>
+<td>M14</td>
+<td>Admission card</td>
+</tr>
+<tr>
+<td><span class="rid">EXM-16</span></td>
+<td>M7</td>
+<td></td>
+<td>Exam attendance</td>
+</tr>
+<tr>
+<td><span class="rid">SCH-01…08</span></td>
+<td>M16</td>
+<td></td>
+<td>Report catalogue</td>
+</tr>
+<tr>
+<td><span class="rid">SEL-01…03</span>, <span class="rid">SEL-05</span>, <span class="rid">SEL-06</span></td>
+<td>M8</td>
+<td>B5.1</td>
+<td>Selection rounds</td>
+</tr>
+<tr>
+<td><span class="rid">SEL-04</span></td>
+<td>M8</td>
+<td>M12, M14</td>
+<td>Dean's list and letter</td>
+</tr>
+<tr>
+<td><span class="rid">ANA-01…03</span></td>
+<td>M17</td>
+<td></td>
+<td>Warehouse, BI and predictive jobs</td>
+</tr>
+<tr>
+<td><span class="rid">PS-01</span></td>
+<td><em>gap, see C1</em></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><span class="rid">PS-02</span>, <span class="rid">PS-03</span></td>
+<td>M4</td>
+<td>M6</td>
+<td>Configurable windows</td>
+</tr>
+<tr>
+<td><span class="rid">PS-04</span></td>
+<td>M9</td>
+<td>M1</td>
+<td>Examiner assignment creates scoped grants</td>
+</tr>
+<tr>
+<td><span class="rid">PS-05</span></td>
+<td>M8</td>
+<td>B5.1</td>
+<td>Progression rule set</td>
+</tr>
+<tr>
+<td><span class="rid">PS-06</span></td>
+<td>M8</td>
+<td>M15</td>
+<td>Supervisor selection round</td>
+</tr>
+<tr>
+<td><span class="rid">PS-07</span></td>
+<td>M14</td>
+<td>M11</td>
+<td>Transcript</td>
+</tr>
+<tr>
+<td><span class="rid">PS-08</span></td>
+<td>M8</td>
+<td></td>
+<td>MIT/IT and specialisation rounds</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h1 id="part-c-gap-analysis-and-refined-architecture-v02">Part C: Gap analysis and refined architecture (v0.2)</h1>
+<h2 id="c1-gaps-found">C1. Gaps found</h2>
+<p>These came from comparing the template with the handbook and the programme analysis (A2). Each gap is either a missing requirement or one that is under-specified.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Gap</th>
+<th>Source</th>
+<th>Impact if ignored</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="rid">G-01</span></td>
+<td><strong>No curriculum versioning.</strong> Rules and structures change each handbook year; current students must keep their edition</td>
+<td>Handbook is per year; A2.3</td>
+<td>Wrong audits for older batches</td>
+<td>Editions in M2 and M3; a batch is pinned to an edition; tooling to clone and diff editions (<strong>C3.1</strong>)</td>
+</tr>
+<tr>
+<td><span class="rid">G-02</span></td>
+<td><strong>Subject capacity and merit ranking</strong> for stream subject allocation (BIOC 60, COST 25, MIBI 60; COSC 150, ELEC 40, STAT 125) are not in the template</td>
+<td>§1.4.1, §1.4.3</td>
+<td>Allocation done off-system</td>
+<td>Selection rounds with option capacities and a ranking on Semester 1 results (M8, already designed); capacity must be configurable per year</td>
+</tr>
+<tr>
+<td><span class="rid">G-03</span></td>
+<td><strong>Prerequisite checks for every programme,</strong> including A/L subject, co-requisite, group and exclusion requisites. The template mentions checks only for MIT/IT</td>
+<td>§1.3, Section 5</td>
+<td>Ineligible registrations</td>
+<td>M2 typed requisites; <strong>A/L results must be imported</strong> into M5 (<strong>C3.2</strong>)</td>
+</tr>
+<tr>
+<td><span class="rid">G-04</span></td>
+<td><strong>Credit-load rules:</strong> ≥ 30 credits per year; ≤ 6 credits from other faculties, ≤ 2 per semester</td>
+<td>§1.4</td>
+<td>Students fail award rules later</td>
+<td>Registration constraint rule set (M3, used by M6)</td>
+</tr>
+<tr>
+<td><span class="rid">G-05</span></td>
+<td><strong>Non-GPA but required items:</strong> ACLT 11013 (pass at C within 2 years), at least one CMSK unit within 2 years, MGMT 11022 within 3 years, and the <strong>safety module quiz each year before any lab</strong></td>
+<td>§1.9, structure footnotes</td>
+<td>Audits wrong; lab safety unenforced</td>
+<td>GPA flag on units; "completion requirement" rules; <strong>lab-access gate</strong> from a new Safety Compliance component (<strong>C3.3</strong>)</td>
+</tr>
+<tr>
+<td><span class="rid">G-06</span></td>
+<td><strong>Lab-attendance grade caps</strong> (50–79% → C, below 50% → D) and the lecture-attendance share of marks (up to 10%)</td>
+<td>§1.8</td>
+<td>Grades wrong</td>
+<td>M7 attendance feeds the M9 grade policy pipeline</td>
+</tr>
+<tr>
+<td><span class="rid">G-07</span></td>
+<td><strong>Medical submissions:</strong> certificate within 14 days; separate rules for certificates not issued by the University Medical Centre</td>
+<td>§1.8</td>
+<td>Unfair or invalid medical attempts</td>
+<td>A Medical request type in M12 with a deadline guard and verification step. An approved medical sets the attempt type to Medical</td>
+</tr>
+<tr>
+<td><span class="rid">G-08</span></td>
+<td><strong>Moderation, Board of Examiners and Senate.</strong> The template lists a moderation sheet but no moderation step. Final results need Senate confirmation (§2.16). Borderline classes are for the Board's discretion</td>
+<td>§2.8.2 notes, §2.16</td>
+<td>Workflow doesn't match governance</td>
+<td>Add an optional <strong>Moderated</strong> state; an <strong>Examination Board</strong> component for class decisions and borderline cases; a <strong>Senate confirmation</strong> step before awards are final (<strong>C3.4</strong>)</td>
+</tr>
+<tr>
+<td><span class="rid">G-09</span></td>
+<td><strong>Time limits beyond "five years":</strong> BSc within 5 consecutive years, Hons within 6; class only if completed within 3 or 4 years. The template mentions only the five-year appeal</td>
+<td>§2.5–2.15</td>
+<td>Wrong classes or awards</td>
+<td><code>withinYears</code> predicates in award and class rule sets. The M11 monitor uses the programme-specific limit</td>
+</tr>
+<tr>
+<td><span class="rid">G-10</span></td>
+<td><strong>Revert to BSc,</strong> distinct from early exit and fallback: within 14 days of Y4 results; BSc result based on Years 1–3 only. Also a degree award request form and "hold results for grade enhancement" request</td>
+<td>§2.8.3, §2.9.3, §2.13.3, §2.16</td>
+<td>Award options missing</td>
+<td>New request types in M12; M11 evaluates the alternative award, which is recalculated on Years 1–3</td>
+</tr>
+<tr>
+<td><span class="rid">G-11</span></td>
+<td><strong>Honours approvals and supervision:</strong> HoD approval of Honours course units before enrolment; a research-project supervisor for <strong>every</strong> Honours programme, not only BSSS</td>
+<td>§1.5.2</td>
+<td>Project allocation off-system</td>
+<td>M6 approval step for Honours enrolment; generalise <span class="rid">PS-06</span> into a <strong>Projects &amp; Placements</strong> component (<strong>C3.5</strong>)</td>
+</tr>
+<tr>
+<td><span class="rid">G-12</span></td>
+<td><strong>Internships and placements:</strong> PRPL 31992 professional placement, SENG 6-month internship, CHEM 44811, BSSS internship</td>
+<td>§1.5.1, structures</td>
+<td>No tracking of placements and evaluations</td>
+<td>Projects &amp; Placements component (<strong>C3.5</strong>)</td>
+</tr>
+<tr>
+<td><span class="rid">G-13</span></td>
+<td><strong>BSSS foundation programme and aptitude test (<span class="rid">PS-01</span>).</strong> Level 0 units and a Certificate of Completion</td>
+<td>§1.5.1 (ii)</td>
+<td><span class="rid">PS-01</span> unmet</td>
+<td>Foundation offering at Level 0, aptitude test as an assessment, certificate template (M9 and M14)</td>
+</tr>
+<tr>
+<td><span class="rid">G-14</span></td>
+<td><strong>Academic advisors.</strong> The handbook tells students to consult an advisor before choosing units</td>
+<td>§1.4, §1.6</td>
+<td>No advising trail</td>
+<td><strong>Advising</strong> component: advisor assignment, notes, plan sign-off (<strong>C3.6</strong>)</td>
+</tr>
+<tr>
+<td><span class="rid">G-15</span></td>
+<td><strong>Offering availability:</strong> "offered depending on staff availability", alternate-year units, limited enrolment, units "available only to students not doing Electronics"</td>
+<td>Structure notes</td>
+<td>Students register for units that are not running</td>
+<td><code>Offering</code> is created per year; exclusion requisites; capacity</td>
+</tr>
+<tr>
+<td><span class="rid">G-16</span></td>
+<td><strong>Dean's list criteria</strong> are not defined in the handbook or the template</td>
+<td><span class="rid">SEL-04</span></td>
+<td>Cannot implement</td>
+<td>Configurable rule set; <strong>open question <span class="rid">Q4</span></strong></td>
+</tr>
+<tr>
+<td><span class="rid">G-17</span></td>
+<td><strong>Registration-number change</strong> must also re-key payments, documents and selections, not only results</td>
+<td><span class="rid">REG-08</span></td>
+<td>Orphaned records</td>
+<td>One <code>StudentId</code> surrogate key everywhere; registration numbers are aliases (M5)</td>
+</tr>
+<tr>
+<td><span class="rid">G-18</span></td>
+<td><strong>Notifications to students</strong> about selection outcomes, result releases, admission holds and withheld results (the template mostly covers examiners)</td>
+<td>General</td>
+<td>Poor communication</td>
+<td>Event catalogue in M15 (<strong>C3.7</strong>)</td>
+</tr>
+<tr>
+<td><span class="rid">G-19</span></td>
+<td><strong>Non-functional requirements</strong> (performance, availability, security, privacy, backup, accessibility, language) are absent from the template</td>
+<td>—</td>
+<td>Unbuildable or unsafe system</td>
+<td>C4</td>
+</tr>
+<tr>
+<td><span class="rid">G-20</span></td>
+<td><strong>Data migration</strong> of existing students, history and results</td>
+<td>—</td>
+<td>Cannot go live mid-cohort</td>
+<td>Migration tooling and a validation report (<strong>C3.8</strong>)</td>
+</tr>
+<tr>
+<td><span class="rid">G-21</span></td>
+<td><strong>Programme coordinator</strong> and per-programme configuration. The template names coordinators per programme but gives them no functions</td>
+<td>Template headers</td>
+<td>No owner for programme settings</td>
+<td><code>ProgrammeCoordinator</code> role scoped to a programme, owning windows, selection rounds and reports for it</td>
+</tr>
+<tr>
+<td><span class="rid">G-22</span></td>
+<td><strong>Student-facing degree planner and what-if</strong>: "which Honours can I still reach?"</td>
+<td>Implied by <span class="rid">EXM-10</span></td>
+<td>Students make uninformed choices</td>
+<td>Uses the rules engine: what-if evaluation of the study plan (M11)</td>
+</tr>
+<tr>
+<td><span class="rid">G-23</span></td>
+<td><strong>Data-quality issues in the handbook:</strong> referenced-but-undefined units (ELEC 11513, ELEC 22513, SENG 11233 …) and inconsistent numbering</td>
+<td>Handbook §5</td>
+<td>Bad master data</td>
+<td>Catalogue validation report in M2; publishing an edition is blocked until errors are resolved</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="c2-requirements-that-conflict-with-the-handbook">C2. Requirements that conflict with the handbook</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Template says</th>
+<th>Handbook says</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="rid">EXM-01</span></td>
+<td>"Repeat student marks should be automatically included as C"</td>
+<td>§2.3: a re-sit can earn <strong>at most C</strong>, and if the re-sit grade is lower, the previous grade stands</td>
+<td>Implement a <strong>cap with keep-better</strong>: <code>grade = min(C, best(new, previous))</code>, where a capped re-sit never lowers an earlier grade. Confirm with the Exam Branch (<strong><span class="rid">Q1</span></strong>)</td>
+</tr>
+<tr>
+<td><span class="rid">PS-05</span></td>
+<td>BSSS progression requires GPA &gt; 2.0</td>
+<td>No progression rule in the handbook; GPA ≥ 2.00 applies only to the award</td>
+<td>Make it a configurable progression rule set; confirm whether it is "≥ 2.00" or "&gt; 2.0" (<strong><span class="rid">Q2</span></strong>)</td>
+</tr>
+<tr>
+<td>Physical Science sheet, Y1 S2</td>
+<td>"Registration … Biological Science Stream"</td>
+<td>—</td>
+<td>Looks like a copy-paste error; treat it as Physical Science</td>
+</tr>
+<tr>
+<td>Mark-entry durations</td>
+<td>3 weeks and 1 week, "to be verified"</td>
+<td>—</td>
+<td>Configuration values per exam session (<strong><span class="rid">Q3</span></strong>)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="c3-architecture-changes">C3. Architecture changes</h2>
+<p>The refined view adds six components and changes three existing ones. The module diagram in B4 is extended as follows.</p>
+<div class="diagram"><pre class="mermaid">flowchart LR
+  PRG[M3 Programme &amp; Regulations] --- ED[C3.1 Curriculum Editions]
+  SR[M5 Student Records] --- AL[C3.2 Prior Qualifications&lt;br/&gt;A/L results]
+  ATT[M7 Attendance] --- SAF[C3.3 Safety Compliance]
+  ASM[M9 Assessment &amp; Results] --- BOE[C3.4 Examination Board&lt;br/&gt;&amp; Senate]
+  SELM[M8 Selections] --- PPL[C3.5 Projects &amp; Placements]
+  REGM[M6 Registration] --- ADV[C3.6 Advising]
+  INT[M18 Integration] --- MIG[C3.8 Migration toolkit]
+</pre></div>
+<h3 id="c31-curriculum-editions-extends-m2-and-m3">C3.1 Curriculum Editions (extends M2 and M3)</h3>
+<ul>
+<li><code>CurriculumEdition</code> (for example, <em>2023/24</em>) owns its course-unit versions, programme editions, structure fragments, rule sets, fee schedules and document templates.</li>
+<li>Each <code>Intake</code>/<code>Batch</code> is pinned to an edition.</li>
+<li>Repeat students who join a later batch keep their original edition unless they are formally transferred.</li>
+<li>Tooling:</li>
+<li>clone an edition</li>
+<li>diff two editions (units added or removed, status changes, rule changes)</li>
+<li>publish, after which the edition is immutable</li>
+<li>run a <strong>regression check</strong>: re-run golden audits for every active batch and flag any outcome changes</li>
+</ul>
+<h3 id="c32-prior-qualifications-extends-m5">C3.2 Prior Qualifications (extends M5)</h3>
+<ul>
+<li>Stores GCE A/L subjects and results (with Z-score if available), imported from the UGC list.</li>
+<li>Used for <code>AL_SUBJECT</code> requisites, such as A/L Physics for PHYS 11512 and A/L Combined Mathematics for AMAT 11223.</li>
+<li>Used to describe the BSSS foundation-programme cohort.</li>
+</ul>
+<h3 id="c33-safety-compliance-new-in-attendance">C3.3 Safety Compliance (new, in Attendance)</h3>
+<ul>
+<li>Each academic year, before Semester I labs, students must pass the non-GPA safety module quiz. It has 5 topics and can be retried without limit.</li>
+<li>The system can import the quiz result from the LMS or host the quiz itself.</li>
+<li><strong>Lab enrolment and lab attendance sheets exclude students who have not passed.</strong></li>
+</ul>
+<h3 id="c34-examination-board-senate-extends-m9-and-m11">C3.4 Examination Board &amp; Senate (extends M9 and M11)</h3>
+<ul>
+<li><strong>Result sheet state machine:</strong> add an optional <code>Moderated</code> state between <code>SecondVerified</code> and <code>HoDRecommended</code>. Whether moderation is required is set per department or level.</li>
+<li><strong>Board decisions:</strong> a <code>BoardMeeting</code> records class decisions, including borderline cases where up to 6 credits of D/D+/C− may still be considered for the next class down. Each decision carries its rationale.</li>
+<li><strong>Senate:</strong> final awards move to <code>Confirmed</code> only after a recorded Senate confirmation. Transcripts and pass lists can be issued only for confirmed awards.</li>
+</ul>
+<h3 id="c35-projects-placements-new-generalises-ps-06">C3.5 Projects &amp; Placements (new, generalises <span class="rid">PS-06</span>)</h3>
+<ul>
+<li>Research projects for all Honours programmes:</li>
+<li>the coordinator publishes topics and supervisors</li>
+<li>students give their preferences (3 by default)</li>
+<li>allocation runs by GPA through an M8 round</li>
+<li>progress milestones are tracked</li>
+<li>the dissertation and oral presentation are assessed in M9</li>
+<li>Placements and internships (PRPL 31992, the SENG 6-month internship, CHEM 44811): host organisation, dates, supervisor, evaluation forms.</li>
+</ul>
+<h3 id="c36-advising-new">C3.6 Advising (new)</h3>
+<ul>
+<li>Advisor assignment per student.</li>
+<li>Advising notes.</li>
+<li>Optional sign-off of the annual registration before it is confirmed.</li>
+<li>A degree-planner view that combines the M11 what-if audit with the M2 prerequisite graph.</li>
+</ul>
+<h3 id="c37-notification-event-catalogue-extends-m15">C3.7 Notification event catalogue (extends M15)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Recipients</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>registration.window.opened</code> / <code>closing</code></td>
+<td>Eligible students</td>
+</tr>
+<tr>
+<td><code>registration.credit_shortfall</code></td>
+<td>Student</td>
+</tr>
+<tr>
+<td><code>results.released</code></td>
+<td>Students of the offering</td>
+</tr>
+<tr>
+<td><code>results.overdue</code></td>
+<td>Examiner, then HoD after N days</td>
+</tr>
+<tr>
+<td><code>selection.published</code></td>
+<td>Applicants</td>
+</tr>
+<tr>
+<td><code>admission.held</code></td>
+<td>Student, with reason and how to clear it</td>
+</tr>
+<tr>
+<td><code>results.withheld</code></td>
+<td>Student</td>
+</tr>
+<tr>
+<td><code>timelimit.approaching</code> / <code>exceeded</code></td>
+<td>Student and Faculty Office</td>
+</tr>
+<tr>
+<td><code>request.status_changed</code></td>
+<td>Requester</td>
+</tr>
+<tr>
+<td><code>payment.failed</code> / <code>succeeded</code></td>
+<td>Payer</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="c38-migration-toolkit-extends-m18">C3.8 Migration toolkit (extends M18)</h3>
+<ul>
+<li>Loaders for master data:</li>
+<li>the catalogue, programme structures and requisites, seeded from the handbook</li>
+<li>students</li>
+<li>historical enrolments and grades</li>
+<li>Reconciliation reports, such as GPA recomputed against legacy GPA and credit totals per student.</li>
+<li>A dry-run mode.</li>
+</ul>
+<h3 id="changes-to-existing-modules">Changes to existing modules</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M6 Registration</td>
+<td>Adds an Honours unit-approval step (<span class="rid">G-11</span>), the safety gate for labs (C3.3) and exclusion requisites (<span class="rid">G-15</span>)</td>
+</tr>
+<tr>
+<td>M9 Results</td>
+<td>Grade policy pipeline is now ordered: lab cap → repeat cap with keep-better → absent → medical → withheld</td>
+</tr>
+<tr>
+<td>M11 Awards</td>
+<td>Adds the revert-to-BSc and award-request types (<span class="rid">G-10</span>), what-if audits (<span class="rid">G-22</span>), Senate confirmation (C3.4) and programme-specific time limits (<span class="rid">G-09</span>)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="c4-non-functional-requirements">C4. Non-functional requirements</h2>
+<p>Proposed targets, to be confirmed with the Faculty.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Users</strong></td>
+<td>About 5,000 students and 400 staff; up to 1,500 concurrent users in a registration window</td>
+</tr>
+<tr>
+<td><strong>Performance</strong></td>
+<td>Registration validation within 500 ms at the 95th percentile; pages within 2 s at the 95th percentile at peak; a degree audit within 300 ms per student; a batch audit of 1,500 students within 5 min</td>
+</tr>
+<tr>
+<td><strong>Availability</strong></td>
+<td>99.5% during the semester, and 99.9% inside registration, selection and result-release windows (protected by change freezes). Maintenance windows are announced</td>
+</tr>
+<tr>
+<td><strong>Data integrity</strong></td>
+<td>Released grades are immutable, with amendments only. Every regulated change is audited. Backups run nightly with point-in-time recovery; RPO ≤ 15 min, RTO ≤ 4 h. A restore is tested each quarter</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>SSO and MFA for privileged roles; least privilege through scoped grants; encryption in transit (TLS 1.2+) and at rest; OWASP ASVS L2; yearly penetration test; secrets in a vault</td>
+</tr>
+<tr>
+<td><strong>Privacy</strong></td>
+<td>Sri Lanka Personal Data Protection Act No. 9 of 2022: lawful purpose, minimal data, retention schedule, subject-access requests, pseudonymised analytics</td>
+</tr>
+<tr>
+<td><strong>Usability and accessibility</strong></td>
+<td>Responsive and mobile-first for students; WCAG 2.1 AA; English UI first, with Sinhala and Tamil possible later (string externalisation from day one)</td>
+</tr>
+<tr>
+<td><strong>Interoperability</strong></td>
+<td>OpenAPI contracts; CSV and XLSX import and export for every master list</td>
+</tr>
+<tr>
+<td><strong>Maintainability</strong></td>
+<td>Module boundaries enforced by architecture tests; at least 80% test coverage on the rules engine; golden tests from handbook examples</td>
+</tr>
+<tr>
+<td><strong>Observability</strong></td>
+<td>Dashboards for queue lag, overdue result sheets, payment failures and error rates; alerts to the on-call administrator</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="c5-deployment">C5. Deployment</h2>
+<div class="diagram"><pre class="mermaid">flowchart TB
+  subgraph DC[University data centre or cloud VPC]
+    LB[Load balancer / WAF]
+    subgraph AppTier
+      A1[API x2+]
+      W1[Workers x2]
+      R1[PDF renderer]
+    end
+    subgraph DataTier
+      PG[(PostgreSQL primary)]
+      PGR[(Streaming replica)]
+      RD[(Redis)]
+      S3[(Object storage)]
+    end
+    KC[Identity provider]
+    MON[Monitoring stack]
+    BI2[BI server]
+  end
+  Users((Users)) --&gt; LB --&gt; A1
+  A1 --&gt; PG &amp; RD &amp; S3 &amp; KC
+  W1 --&gt; PG &amp; RD &amp; S3
+  PG --&gt; PGR --&gt; BI2
+  A1 &amp; W1 --&gt; MON
+  BK[(Off-site encrypted backups)]
+  PG --&gt; BK
+</pre></div>
+<ul>
+<li><strong>Environments:</strong> dev, test (with anonymised data), staging (mirrors production) and production.</li>
+<li><strong>CI/CD:</strong>
+  1. lint
+  2. unit tests
+  3. rules golden tests
+  4. migration check
+  5. container build
+  6. deploy to staging
+  7. manual promotion to production</li>
+</ul>
+<h2 id="c6-technology-choices">C6. Technology choices</h2>
+<p>These are recommendations. The architecture itself does not depend on them.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Choice</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td>TypeScript end-to-end</td>
+<td>One language across UI, API and rules; strong typing for rule ASTs</td>
+</tr>
+<tr>
+<td>Backend</td>
+<td>NestJS (modules map 1:1 to M1–M18)</td>
+<td>Built-in modularity, dependency injection, guards for scoped authorisation</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td>React with Next.js, and a component library</td>
+<td>Mature, accessible components; server-side rendering for fast portals</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>PostgreSQL 16</td>
+<td>Transactions, row-level security, JSONB for rule documents, logical replication</td>
+</tr>
+<tr>
+<td>Cache and queues</td>
+<td>Redis with BullMQ</td>
+<td>Delayed and repeat jobs for deadlines and reminders</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td>Keycloak (OIDC), federated with KLN accounts</td>
+<td>Self-hosted, MFA, roles</td>
+</tr>
+<tr>
+<td>Documents</td>
+<td>HTML templates rendered to PDF by headless Chromium</td>
+<td>Same templates for screen and print</td>
+</tr>
+<tr>
+<td>Object storage</td>
+<td>MinIO (S3-compatible)</td>
+<td>On-premises</td>
+</tr>
+<tr>
+<td>Analytics</td>
+<td>Metabase on the replica or warehouse; Python (pandas, scikit-learn) for <span class="rid">ANA-03</span></td>
+<td>Low cost</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>OpenTelemetry, Prometheus, Grafana, Loki</td>
+<td>Open standards</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Alternative:</strong> Java with Spring Boot (Spring Modulith) fits the same design if the University's IT team prefers the JVM.</p>
+<h2 id="c7-delivery-phases">C7. Delivery phases</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Scope</th>
+<th>Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0. Foundations</strong></td>
+<td>IAM, Catalogue, Editions, Programme &amp; Regulations, rules engine with golden tests, migration of master data</td>
+<td>Base for everything</td>
+</tr>
+<tr>
+<td><strong>1. Registration</strong></td>
+<td>Student Records, Calendar, Registration (validation pipeline), Payments for repeats, Notifications, basic reports</td>
+<td>REG-*, <span class="rid">SCH-01…08</span>, <span class="rid">PS-02</span>, <span class="rid">PS-03</span></td>
+</tr>
+<tr>
+<td><strong>2. Results</strong></td>
+<td>Assessment &amp; Results workflow, Attendance, Exam Operations, Exam Board, admission cards</td>
+<td>EXM-*, <span class="rid">REG-18</span>, <span class="rid">PS-04</span></td>
+</tr>
+<tr>
+<td><strong>3. Selections &amp; Awards</strong></td>
+<td>Selection rounds (all types), Degree Audit, pass lists, exits and reverts, Senate confirmation</td>
+<td>SEL-*, <span class="rid">EXM-10</span>, <span class="rid">EXM-11</span>, <span class="rid">REQ-04…06</span>, <span class="rid">PS-05</span>, <span class="rid">PS-06</span>, <span class="rid">PS-08</span></td>
+</tr>
+<tr>
+<td><strong>4. Student services</strong></td>
+<td>Requests and appeals, documents and transcripts, Dean's list, Projects &amp; Placements, Advising</td>
+<td><span class="rid">REQ-01…03</span>, <span class="rid">SEL-04</span>, <span class="rid">PS-07</span>, <span class="rid">G-11…14</span></td>
+</tr>
+<tr>
+<td><strong>5. Insight</strong></td>
+<td>Warehouse, dashboards, predictive models</td>
+<td><span class="rid">ANA-01…03</span></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="c8-open-questions">C8. Open questions</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Affects</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="rid">Q1</span></td>
+<td>Repeat grading: confirm "cap at C, keep the better grade" (handbook) rather than "always C" (template)</td>
+<td>M9</td>
+</tr>
+<tr>
+<td><span class="rid">Q2</span></td>
+<td>BSSS progression: GPA ≥ 2.00 or &gt; 2.0? Over which years? Does it apply to other programmes?</td>
+<td>M8 rules</td>
+</tr>
+<tr>
+<td><span class="rid">Q3</span></td>
+<td>Mark-entry durations (3 weeks and 1 week): fixed, or set per exam session? Is moderation mandatory?</td>
+<td>M9</td>
+</tr>
+<tr>
+<td><span class="rid">Q4</span></td>
+<td>Dean's list criteria and frequency</td>
+<td>M8</td>
+</tr>
+<tr>
+<td><span class="rid">Q5</span></td>
+<td>Which University systems exist today, and their interfaces: admin registration, exam system, LMS, payment gateway?</td>
+<td>M18</td>
+</tr>
+<tr>
+<td><span class="rid">Q6</span></td>
+<td>Is the Honours entry GPA (3.00) the overall Year 1–2 GPA, or the subject GPA? The handbook is ambiguous</td>
+<td>Rule sets</td>
+</tr>
+<tr>
+<td><span class="rid">Q7</span></td>
+<td>Hosting: University data centre or cloud? Who operates it?</td>
+<td>C5</td>
+</tr>
+<tr>
+<td><span class="rid">Q8</span></td>
+<td>Which fees apply (repeat, medical, documents), and do they vary by programme or edition?</td>
+<td>M13</td>
+</tr>
+<tr>
+<td><span class="rid">Q9</span></td>
+<td>Which identity provider do KLN accounts use, and can it be federated through OIDC or SAML?</td>
+<td>M1</td>
+</tr>
+<tr>
+<td><span class="rid">Q10</span></td>
+<td>Does the Faculty want SMS? Which provider?</td>
+<td>M15</td>
+</tr>
+</tbody>
+</table></div>
+  </article></main>
+</div>
+<div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-labelledby="viewer-title">
+  <div class="bar">
+    <span class="title" id="viewer-title">Diagram</span>
+    <span class="pct" id="viewer-pct">100%</span>
+    <button class="btn" type="button" id="z-out" aria-label="Zoom out">−</button>
+    <button class="btn" type="button" id="z-in" aria-label="Zoom in">+</button>
+    <button class="btn" type="button" id="z-fit">Fit</button>
+    <button class="btn" type="button" id="z-close">Close</button>
+  </div>
+  <div class="stage" id="viewer-stage"><div class="canvas" id="viewer-canvas"></div><div class="hint">Scroll or pinch to zoom · drag to pan · Esc to close</div></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  const root=document.documentElement;
+  try{const t=localStorage.getItem("sis-arch-theme");if(t)root.dataset.theme=t}catch(e){}
+  const isDark=()=>root.dataset.theme?root.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
+  // keep mermaid sources so diagrams can re-render on theme change
+  const blocks=[...document.querySelectorAll("pre.mermaid")];blocks.forEach(b=>b.dataset.src=b.textContent);
+  function renderDiagrams(){
+    if(!window.mermaid)return;
+    blocks.forEach(b=>{b.removeAttribute("data-processed");b.innerHTML="";b.textContent=b.dataset.src});
+    mermaid.initialize({startOnLoad:false,securityLevel:"strict",theme:isDark()?"dark":"neutral",fontFamily:"IBM Plex Sans, system-ui, sans-serif",flowchart:{htmlLabels:true,curve:"basis"}});
+    mermaid.run({nodes:blocks}).catch(()=>{});
+  }
+  renderDiagrams();
+  document.getElementById("theme").addEventListener("click",()=>{root.dataset.theme=isDark()?"light":"dark";try{localStorage.setItem("sis-arch-theme",root.dataset.theme)}catch(e){}renderDiagrams()});
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{if(!root.dataset.theme)renderDiagrams()});
+
+  // ---- diagram zoom viewer ----
+  const viewer=document.getElementById("viewer"),stage=document.getElementById("viewer-stage"),canvas=document.getElementById("viewer-canvas"),pct=document.getElementById("viewer-pct");
+  let S={k:1,x:0,y:0,w:0,h:0},lastFocus=null,current=null;
+  const MIN=0.1,MAX=8;
+  const apply=()=>{canvas.style.transform=`translate(${S.x}px,${S.y}px) scale(${S.k})`;pct.textContent=Math.round(S.k*100)+"%"};
+  function fit(){const r=stage.getBoundingClientRect(),pad=32;const k=Math.min((r.width-pad*2)/S.w,(r.height-pad*2)/S.h,2);S.k=Math.max(MIN,k);S.x=(r.width-S.w*S.k)/2;S.y=(r.height-S.h*S.k)/2;apply()}
+  function zoomAt(f,cx,cy){const nk=Math.min(MAX,Math.max(MIN,S.k*f));const r=stage.getBoundingClientRect();cx??=r.width/2;cy??=r.height/2;S.x=cx-(cx-S.x)*(nk/S.k);S.y=cy-(cy-S.y)*(nk/S.k);S.k=nk;apply()}
+  function headingFor(el){let n=el;while(n&&(n=n.previousElementSibling)){if(/^H[1-4]$/.test(n.tagName))return n.textContent}return "Diagram"}
+  function openViewer(diag){
+    const svg=diag.querySelector("pre.mermaid svg");if(!svg)return;
+    current=diag;lastFocus=document.activeElement;
+    const c=svg.cloneNode(true);c.removeAttribute("style");
+    const vb=(svg.getAttribute("viewBox")||"").split(/[\s,]+/).map(Number);
+    const bb=svg.getBoundingClientRect();
+    S.w=vb.length===4&&vb[2]?vb[2]:bb.width;S.h=vb.length===4&&vb[3]?vb[3]:bb.height;
+    c.setAttribute("width",S.w);c.setAttribute("height",S.h);
+    canvas.replaceChildren(c);
+    document.getElementById("viewer-title").textContent=headingFor(diag);
+    viewer.hidden=false;document.body.style.overflow="hidden";
+    requestAnimationFrame(fit);document.getElementById("z-close").focus();
+  }
+  function closeViewer(){viewer.hidden=true;document.body.style.overflow="";canvas.replaceChildren();current=null;if(lastFocus)lastFocus.focus()}
+  document.querySelectorAll(".diagram").forEach(d=>{
+    const b=document.createElement("button");b.type="button";b.className="btn zoom-btn";b.textContent="Zoom";
+    b.setAttribute("aria-label","Open diagram in zoom viewer");b.addEventListener("click",()=>openViewer(d));d.appendChild(b);
+    d.addEventListener("click",e=>{if(e.target.closest("pre.mermaid svg"))openViewer(d)});
+  });
+  document.getElementById("z-in").addEventListener("click",()=>zoomAt(1.25));
+  document.getElementById("z-out").addEventListener("click",()=>zoomAt(0.8));
+  document.getElementById("z-fit").addEventListener("click",fit);
+  document.getElementById("z-close").addEventListener("click",closeViewer);
+  addEventListener("keydown",e=>{if(viewer.hidden)return;
+    if(e.key==="Escape")closeViewer();else if(e.key==="+"||e.key==="=")zoomAt(1.25);else if(e.key==="-")zoomAt(0.8);else if(e.key==="0")fit();
+    else if(e.key.startsWith("Arrow")){const d=40;if(e.key==="ArrowLeft")S.x+=d;if(e.key==="ArrowRight")S.x-=d;if(e.key==="ArrowUp")S.y+=d;if(e.key==="ArrowDown")S.y-=d;apply();e.preventDefault()}});
+  stage.addEventListener("wheel",e=>{e.preventDefault();const r=stage.getBoundingClientRect();const f=Math.exp(-e.deltaY*(e.ctrlKey?0.01:0.0015));zoomAt(f,e.clientX-r.left,e.clientY-r.top)},{passive:false});
+  const pts=new Map();let pinch=null;
+  stage.addEventListener("pointerdown",e=>{stage.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});stage.classList.add("dragging");
+    if(pts.size===2){const [a,b]=[...pts.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)}}});
+  stage.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId))return;const p=pts.get(e.pointerId);
+    if(pts.size===1){S.x+=e.clientX-p.x;S.y+=e.clientY-p.y;apply()}
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===2&&pinch){const [a,b]=[...pts.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);const r=stage.getBoundingClientRect();zoomAt(d/pinch.d,(a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top);pinch.d=d}});
+  const up=e=>{pts.delete(e.pointerId);if(pts.size<2)pinch=null;if(!pts.size)stage.classList.remove("dragging")};
+  stage.addEventListener("pointerup",up);stage.addEventListener("pointercancel",up);
+  stage.addEventListener("dblclick",e=>{const r=stage.getBoundingClientRect();zoomAt(1.6,e.clientX-r.left,e.clientY-r.top)});
+  addEventListener("resize",()=>{if(!viewer.hidden)fit()});
+
+  // mobile drawer
+  const toc=document.getElementById("toc"),menu=document.getElementById("menu");
+  menu.addEventListener("click",()=>{const o=toc.classList.toggle("open");menu.setAttribute("aria-expanded",o)});
+  toc.addEventListener("click",e=>{if(e.target.tagName==="A"&&toc.classList.contains("open")){toc.classList.remove("open");menu.setAttribute("aria-expanded","false")}});
+
+  // highlight current section in the contents
+  const links=[...toc.querySelectorAll("a[href^='#']")],map=new Map(links.map(a=>[a.getAttribute("href").slice(1),a]));
+  const heads=[...document.querySelectorAll("article h1[id], article h2[id]")];
+  const spy=()=>{let cur=heads[0];for(const h of heads){if(h.getBoundingClientRect().top<120)cur=h;else break}
+    links.forEach(a=>a.classList.remove("active"));const a=cur&&map.get(cur.id);if(a){a.classList.add("active");if(innerWidth>1000)a.scrollIntoView({block:"nearest"})}};
+  addEventListener("scroll",spy,{passive:true});spy();
+})();
+</script>
+</body>
+</html>
