@@ -61,7 +61,7 @@ window.Mock = (function () {
       programme: "ps", programmeLabel: "BSc (Physical Science)", combination: "ps2", combinationLabel: "PS 2 · Computer Science + Physics + Pure Mathematics",
       year: 2, intake: "2025/26", edition: "2023/24", status: "Active", adminRegistered: true, safetyModule: true,
       regDate: "2025-12-01", validUntil: "2030-11-30",
-      mobile: "+94 77 123 4567", land: "+94 11 291 2345", personalEmail: "kavindi.s@example.com", uniEmail: "ps2025041@stu.example.ac.lk",
+      mobile: "+94 77 123 4567", land: "+94 11 291 2345", personalEmail: "kavindi.s@example.com", uniEmail: "ps2025041@stu.kln.ac.lk",
       address: "No. 12, Temple Road, Kiribathgoda", nic: "200412345678", alResults: [["Combined Mathematics", "A"], ["Physics", "B"], ["Chemistry", "B"]], zScore: "1.8432",
       advisor: "Dr. N. Advisor (sample)",
     };
@@ -100,7 +100,7 @@ window.Mock = (function () {
       for (let k = 0; k < count; k++) {
         const yr = 1 + Math.floor(r() * p.years); const intake = 2026 - yr + 1; const pr = person(n);
         const st = r() < 0.04 ? "Suspended" : r() < 0.04 ? "Results withheld" : r() < 0.03 ? "Deferred" : "Active";
-        students.push({ id: "x" + n, regNo: `${p.prefix}/${intake}/${String(100 + n).padStart(3, "0")}`, name: pr.name, gender: pr.gender, programme: p.id, programmeLabel: p.label, year: yr, intake: `${intake}/${String(intake + 1).slice(2)}`, status: st, gpa: Math.round((2 + r() * 1.9) * 100) / 100, adminRegistered: r() > 0.07, email: `${p.prefix.toLowerCase()}${intake}${100 + n}@stu.example.ac.lk` });
+        students.push({ id: "x" + n, regNo: `${p.prefix}/${intake}/${String(100 + n).padStart(3, "0")}`, name: pr.name, gender: pr.gender, programme: p.id, programmeLabel: p.label, year: yr, intake: `${intake}/${String(intake + 1).slice(2)}`, status: st, gpa: Math.round((2 + r() * 1.9) * 100) / 100, adminRegistered: r() > 0.07, email: `${p.prefix.toLowerCase()}${intake}${100 + n}@stu.kln.ac.lk` });
         n++;
       }
     });

@@ -280,10 +280,129 @@ window.App = (function () {
     return { refresh(r) { cur = r; if (!A.$("#fb-panel").hidden) open(true); }, open, close, toggle() { A.$("#fb-panel").hidden ? open() : close(); }, count: () => all().length, sync, pending };
   })();
 
+  /* ---------- sign-in (REG-14): mock of KLN single sign-on + password, MFA for privileged roles ---------- */
+  const SK = "fos-sis-proto-signed-in";
+  const MFA_ROLES = ["hod", "dean", "exam", "admin"];
+  /* Demo accounts. Default password is the same for all of them; usernames are the role names. */
+  const DEFAULT_PASSWORD = "Sis@2026";
+  const SSO_DOMAIN = "kln.ac.lk"; // Google sign-in accepts only kln.ac.lk accounts (including sub-domains such as stu.kln.ac.lk)
+  const DEMO_EMAIL = { student: "ps2025041@stu.kln.ac.lk", lecturer: "lecturer.demo@kln.ac.lk", hod: "hod.demo@kln.ac.lk", dean: "dean.demo@kln.ac.lk", exam: "exams.demo@kln.ac.lk", coord: "coordinator.demo@kln.ac.lk", admin: "admin.demo@kln.ac.lk" };
+  const DEMO_USER = { student: "student", lecturer: "lecturer", hod: "hod", dean: "dean", exam: "exams", coord: "coordinator", admin: "admin" };
+  A.demoEmail = (role) => DEMO_EMAIL[role];
+  const klnEmail = (e) => { const d = (e.split("@")[1] || "").toLowerCase(); return d === SSO_DOMAIN || d.endsWith("." + SSO_DOMAIN); };
+  A.signedIn = () => { try { return sessionStorage.getItem(SK) === "1"; } catch (e) { return true; } };
+  const LOGIN_ROUTE = { id: "login", title: "Sign in", req: ["REG-14"] };
+  let loginStep = { stage: "password", role: null, preset: null };
+
+  function showLogin() {
+    A.$("#app-shell").hidden = true; const box = A.$("#login"); box.hidden = false;
+    const accounts = Object.keys(A.ROLES).map((r) => ({ r, email: A.demoEmail(r), user: DEMO_USER[r], name: state.users[A.ROLES[r].user].name }));
+    const preset = accounts.find((a) => a.r === (loginStep.preset || "student"));
+    box.innerHTML = `<div class="login">
+      <section class="login-brand"><img src="assets/img/fos-logo.png" alt="University of Kelaniya, Faculty of Science" width="300" height="68">
+        <h1>Student Information System</h1><p>Registration, results, examinations and selections for the Faculty of Science.</p>
+        <ul class="login-points"><li>Students: register for course units, see results and request documents</li><li>Staff: enter and approve marks, run examinations and selections</li></ul>
+        <p class="tiny" style="opacity:.75">Prototype v0.1 · sample data only · <a href="../docs/architecture/sis-architecture.html" target="_blank" rel="noopener">Architecture documentation</a></p></section>
+      <section class="login-panel"><div class="login-card">${loginStep.stage === "mfa" ? mfaHTML() : loginStep.stage === "reset" ? resetHTML() : loginStep.stage === "reset-sent" ? resetSentHTML() : passwordHTML(preset)}</div>
+        <div class="login-card demo"><h2>Default demo accounts</h2><p class="small muted" style="margin:0">Password for every account: <b class="mono">${DEFAULT_PASSWORD}</b>. Choose an account to fill in the form.</p>
+          <div class="demo-list">${accounts.map((a) => `<button type="button" class="demo-acc" data-acc="${a.r}"><b>${esc(A.ROLES[a.r].label)}</b><span>Username: <span class="mono">${esc(a.user)}</span></span><span class="mono tiny">${esc(a.email)}</span></button>`).join("")}</div></div></section></div>`;
+    bindLogin(box, accounts);
+    A.Feedback.refresh(LOGIN_ROUTE);
+    document.title = "Sign in · FoS SIS prototype";
+  }
+  function passwordHTML(preset) {
+    return `<h2>Sign in</h2><p class="small muted" style="margin:0">Use your University account.</p>
+      <button class="btn sso" type="button" id="sso"><svg class="g" viewBox="0 0 48 48" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M45 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2.1 5-4.4 6.6v5.5h7.1C42.6 36.7 45 31.1 45 24.5z"/><path fill="#34A853" d="M24 46c5.9 0 10.9-2 14.5-5.3l-7.1-5.5c-2 1.3-4.5 2.1-7.4 2.1-5.7 0-10.6-3.9-12.3-9.1H4.4v5.7C8 41.1 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.7 28.2c-.4-1.3-.7-2.7-.7-4.2s.3-2.9.7-4.2v-5.7H4.4C2.9 17.1 2 20.4 2 24s.9 6.9 2.4 9.9l7.3-5.7z"/><path fill="#EA4335" d="M24 10.7c3.2 0 6.1 1.1 8.4 3.3l6.3-6.3C34.9 4.1 29.9 2 24 2 15.4 2 8 6.9 4.4 14.1l7.3 5.7c1.7-5.2 6.6-9.1 12.3-9.1z"/></svg>Sign in with Google</button>
+      <p class="tiny muted" style="margin:-6px 0 0;text-align:center">Only University of Kelaniya Google accounts (<b>@kln.ac.lk</b>) can use Google sign-in.</p>
+      <div class="or"><span>or use your username and password</span></div>
+      <form id="login-form" class="stack" novalidate>
+        <label class="field"><span>Username or University email</span><input id="lg-email" type="text" autocomplete="username" value="${esc(preset ? preset.user : "")}" placeholder="username or name@kln.ac.lk" required></label>
+        <label class="field"><span>Password</span><input id="lg-pass" type="password" autocomplete="current-password" value="${esc(preset ? DEFAULT_PASSWORD : "")}" required></label>
+        <div class="row" style="justify-content:space-between"><label class="check"><input type="checkbox" id="lg-remember" checked> Keep me signed in on this device</label><button class="btn ghost sm" type="button" id="forgot">Forgot password?</button></div>
+        <div id="lg-err" role="alert"></div>
+        <button class="btn primary lg" type="submit">Sign in</button></form>`;
+  }
+  function mfaHTML() {
+    const u = state.users[A.ROLES[loginStep.role].user];
+    return `<h2>Two-step verification</h2><p class="small muted" style="margin:0">${esc(A.ROLES[loginStep.role].label)} accounts need a second step. Enter the 6-digit code from your authenticator app.</p>
+      <p class="small" style="margin:0">Signing in as <b>${esc(u.name)}</b></p>
+      <form id="mfa-form" class="stack" novalidate><label class="field"><span>Verification code</span><input id="mfa-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" class="mono" style="font-size:1.3rem;letter-spacing:.3em;text-align:center"></label>
+        <div id="lg-err" role="alert"></div><p class="tiny muted" style="margin:0">Prototype: any 6 digits work, for example 123456.</p>
+        <div class="row"><button class="btn" type="button" id="mfa-back">Back</button><button class="btn primary lg" type="submit" style="flex:1">Verify</button></div></form>`;
+  }
+  function resetHTML() {
+    return `<h2>Reset your password</h2><p class="small muted" style="margin:0">Enter your University email. We'll send a link to reset your password. Student and staff passwords are managed by the University account service.</p>
+      <form id="reset-form" class="stack" novalidate><label class="field"><span>University email</span><input id="rs-email" type="email" autocomplete="username" placeholder="name@kln.ac.lk"></label><div id="lg-err" role="alert"></div>
+      <div class="row"><button class="btn" type="button" id="rs-back">Back to sign in</button><button class="btn primary" type="submit" style="flex:1">Send reset link</button></div></form>`;
+  }
+  function resetSentHTML() {
+    return `<h2>Check your email</h2>${A.alert("ok", "If an account exists for that address, a password reset link has been sent. The link expires in 30 minutes.")}<button class="btn primary lg" type="button" id="rs-done">Back to sign in</button>`;
+  }
+  function bindLogin(box, accounts) {
+    const err = (m) => { const e = A.$("#lg-err", box); if (e) e.innerHTML = m ? A.alert("bad", esc(m)) : ""; };
+    A.$$("[data-acc]", box).forEach((b) => b.onclick = () => { loginStep = { stage: "password", preset: b.dataset.acc }; showLogin(); A.$("#lg-pass").focus(); });
+    const f = A.$("#login-form", box);
+    if (f) {
+      f.addEventListener("submit", (e) => {
+        e.preventDefault(); const id = A.$("#lg-email").value.trim().toLowerCase(), pw = A.$("#lg-pass").value;
+        if (!id || !pw) return err("Enter your username and password.");
+        const acc = accounts.find((a) => a.user === id || a.email.toLowerCase() === id);
+        if (!acc || pw !== DEFAULT_PASSWORD) return err("Incorrect username or password. In the prototype, use a default demo account below.");
+        proceed(acc.r);
+      });
+      A.$("#forgot").onclick = () => { loginStep = { stage: "reset" }; showLogin(); A.$("#rs-email").focus(); };
+      A.$("#sso").onclick = () => googleChooser(accounts);
+      if (!A.$("#lg-email").value) A.$("#lg-email").focus();
+    }
+    const m = A.$("#mfa-form", box);
+    if (m) {
+      A.$("#mfa-code").focus();
+      m.addEventListener("submit", (e) => { e.preventDefault(); if (!/^\d{6}$/.test(A.$("#mfa-code").value.trim())) return err("Enter the 6-digit code."); complete(loginStep.role); });
+      A.$("#mfa-back").onclick = () => { loginStep = { stage: "password", preset: loginStep.role }; showLogin(); };
+    }
+    const r = A.$("#reset-form", box);
+    if (r) {
+      r.addEventListener("submit", (e) => { e.preventDefault(); const v = A.$("#rs-email").value.trim(); if (!/^\S+@\S+\.\S+$/.test(v)) return err("Enter a valid email address."); loginStep = { stage: "reset-sent" }; showLogin(); });
+      A.$("#rs-back").onclick = () => { loginStep = { stage: "password" }; showLogin(); };
+    }
+    const d = A.$("#rs-done", box); if (d) d.onclick = () => { loginStep = { stage: "password" }; showLogin(); };
+  }
+  /* Mock of Google's account chooser. Only kln.ac.lk accounts are accepted; the account must also exist in the SIS. */
+  function googleChooser(accounts) {
+    const signIn = (email, bg) => {
+      const out = A.$("#g-err", bg); email = email.trim().toLowerCase();
+      if (!/^\S+@\S+\.\S+$/.test(email)) { out.innerHTML = A.alert("bad", "Enter a Google account email address."); return; }
+      if (!klnEmail(email)) { out.innerHTML = A.alert("bad", `<b>${esc(email)}</b> cannot sign in. Google sign-in is only allowed for University of Kelaniya accounts ending in <b>@kln.ac.lk</b>. Use your University Google account, or sign in with your username and password.`); return; }
+      const acc = accounts.find((a) => a.email.toLowerCase() === email);
+      if (!acc) { out.innerHTML = A.alert("bad", `<b>${esc(email)}</b> is a University account, but it is not registered in the SIS yet. Contact the Faculty Office.`); return; }
+      bg.remove(); proceed(acc.r);
+    };
+    const bg = A.modal({
+      title: "Sign in with Google",
+      body: `<p class="small muted" style="margin:0">In the real system this is Google's sign-in page, restricted to the <b>kln.ac.lk</b> domain.</p>
+        <div class="demo-list">${accounts.map((a) => `<button type="button" class="demo-acc" data-gacc="${esc(a.email)}"><b>${esc(a.name)}</b><span class="mono tiny">${esc(a.email)}</span></button>`).join("")}</div>
+        <form id="g-other" class="stack" novalidate><label class="field"><span>Use another Google account</span><input id="g-email" type="email" placeholder="name@gmail.com or name@kln.ac.lk" autocomplete="email"></label><button class="btn" type="submit">Continue</button></form>
+        <div id="g-err" role="alert"></div>`,
+      actions: [],
+    });
+    A.$$("[data-gacc]", bg).forEach((b) => b.onclick = () => signIn(b.dataset.gacc, bg));
+    A.$("#g-other", bg).addEventListener("submit", (e) => { e.preventDefault(); signIn(A.$("#g-email", bg).value, bg); });
+  }
+  function proceed(role) { if (MFA_ROLES.includes(role)) { loginStep = { stage: "mfa", role }; showLogin(); } else complete(role); }
+  function complete(role) {
+    try { sessionStorage.setItem(SK, "1"); } catch (e) {}
+    state.role = role; A.save(); loginStep = { stage: "password" };
+    A.$("#login").hidden = true; A.$("#login").innerHTML = ""; A.$("#app-shell").hidden = false;
+    location.hash = firstRoute(); render(); A.toast(`Signed in as ${state.users[A.ROLES[role].user].name}`);
+  }
+  A.signOut = () => { try { sessionStorage.removeItem(SK); } catch (e) {} loginStep = { stage: "password", preset: state.role }; history.replaceState(null, "", location.pathname + location.search); showLogin(); A.toast("You have signed out."); };
+
   /* ---------- boot ---------- */
   A.boot = (seedFn) => {
     A.load(seedFn);
-    try { const qr = new URLSearchParams(location.search).get("role"); if (qr && A.ROLES[qr]) { state.role = qr; A.save(); } } catch (e) {}
+    const qp = new URLSearchParams(location.search);
+    try { const qr = qp.get("role"); if (qr && A.ROLES[qr]) { state.role = qr; A.save(); loginStep.preset = qr; } } catch (e) {}
+    if (qp.get("signedin") === "1") { try { sessionStorage.setItem(SK, "1"); } catch (e) {} }
     try { const t = localStorage.getItem("fos-sis-proto-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
     try { if (localStorage.getItem("fos-sis-proto-reqs") === "hide") document.body.classList.add("hide-reqs"); } catch (e) {}
     const sel = A.$("#role-select");
@@ -295,8 +414,9 @@ window.App = (function () {
     A.$("#reset-demo").addEventListener("click", () => A.confirm("Reset demo data", "This puts every screen back to its starting sample data. Saved feedback is kept.", "Reset", () => { A.reset(seedFn); render(); A.toast("Demo data reset"); }, "danger"));
     A.$("#toggle-reqs").addEventListener("click", () => { const h = document.body.classList.toggle("hide-reqs"); try { localStorage.setItem("fos-sis-proto-reqs", h ? "hide" : "show"); } catch (e) {} });
     A.$("#toggle-theme").addEventListener("click", () => { const r = document.documentElement; const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; r.dataset.theme = dark ? "light" : "dark"; try { localStorage.setItem("fos-sis-proto-theme", r.dataset.theme); } catch (e) {} });
-    window.addEventListener("hashchange", render);
-    render();
+    A.$("#sign-out").addEventListener("click", () => A.signOut());
+    window.addEventListener("hashchange", () => { if (A.signedIn()) render(); });
+    if (A.signedIn()) render(); else showLogin();
     setTimeout(() => A.Feedback.sync(), 1500); // send anything saved while offline or before the sheet was connected
   };
   return A;

@@ -18,9 +18,30 @@ The fonts load from Google Fonts. Offline, the page falls back to system fonts a
 
 The **Architecture documentation** link in the top banner opens `../docs/architecture/sis-architecture.html`. When you publish, upload the repository root rather than only `prototype/`, so that the link keeps working. For example, GitHub Pages serving the repository root gives `…/prototype/` and `…/docs/architecture/sis-architecture.html`.
 
+## Signing in
+
+The prototype opens on a sign-in page. Nothing is checked against a real account service.
+
+| Role | Username | University email |
+|---|---|---|
+| Student | `student` | ps2025041@stu.kln.ac.lk |
+| Lecturer / Examiner | `lecturer` | lecturer.demo@kln.ac.lk |
+| Head of Department | `hod` | hod.demo@kln.ac.lk |
+| Dean | `dean` | dean.demo@kln.ac.lk |
+| Faculty Office / Exam Branch | `exams` | exams.demo@kln.ac.lk |
+| Programme Coordinator | `coordinator` | coordinator.demo@kln.ac.lk |
+| System Administrator | `admin` | admin.demo@kln.ac.lk |
+
+- **Default password** for every account: `Sis@2026`. The student account is filled in by default.
+- **Sign in with Google** accepts only University of Kelaniya accounts ending in **@kln.ac.lk**, including sub-domains such as stu.kln.ac.lk. Any other Google address, for example a Gmail account, is refused with an explanation. A kln.ac.lk address that has no SIS account is told to contact the Faculty Office.
+- **Two-step verification** applies to the Head of Department, Dean, Exam Branch and Administrator. Any 6-digit code works in the prototype.
+- **Forgot password?** shows the reset-link flow.
+- **Sign out** is in the top bar.
+- Sign-in lasts until the browser tab is closed.
+
 ## Using it in a feedback session
 
-1. **Choose a role** with **Viewing as** in the top bar:
+1. **Choose a role** by signing in with that role's account. Once signed in, you can switch with **Viewing as** in the top bar:
    - Student
    - Lecturer / Examiner
    - Head of Department
@@ -28,7 +49,10 @@ The **Architecture documentation** link in the top banner opens `../docs/archite
    - Faculty Office / Exam Branch
    - Programme Coordinator
    - System Administrator
-2. **Send each group a link that opens their view**, for example `index.html?role=lecturer`. Valid values are `student`, `lecturer`, `hod`, `dean`, `exam`, `coord` and `admin`.
+2. **Send each group a link for their role.**
+   - `index.html?role=lecturer` opens the sign-in page with that account already filled in.
+   - Adding `&signedin=1` skips sign-in completely.
+   - Valid roles are `student`, `lecturer`, `hod`, `dean`, `exam`, `coord` and `admin`.
 3. **Each screen lists the requirement IDs it demonstrates**, such as `REG-03` and `EXM-05`, from the SIS requirements template. Hide them with **Show / hide requirement IDs** in the top banner.
 4. **Feedback:** **Give feedback** (bottom right) saves a rating and a comment for the current screen.
    - **Google Sheet and email:** once connected ([feedback-sheet/README.md](feedback-sheet/README.md)), every item is added to the feedback spreadsheet in the project Drive folder, emailed to the project owner, and copied to an Excel file in the same folder.
