@@ -1,0 +1,962 @@
+{
+  "source": "Student Handbook 2023/2024, Faculty of Science, University of Kelaniya",
+  "notes": "feeder_combinations_derived are inferred from course-structure tables, not stated verbatim.",
+  "grading": {
+    "A+": 4.0,
+    "A": 4.0,
+    "A-": 3.7,
+    "B+": 3.3,
+    "B": 3.0,
+    "B-": 2.7,
+    "C+": 2.3,
+    "C": 2.0,
+    "C-": 1.7,
+    "D+": 1.3,
+    "D": 1.0,
+    "E": 0.0
+  },
+  "common_rules": [
+    "ACLT 11013 min C within first 2 years (non-GPA)",
+    "At least one CMSK unit within first 2 years (non-GPA)",
+    "Non-GPA safety module each year before labs",
+    "<= 6 credits from other faculties, <= 2 per semester",
+    ">= 30 credits per year",
+    "Re-sit best grade is C",
+    "Lab attendance 50-79% caps grade at C; <50% caps at D"
+  ],
+  "streams": {
+    "bs": {
+      "name": "Biological Science",
+      "ugc_intake": 221,
+      "subject_selection": "start of Y1 Semester 2 (on Sem 1 results if oversubscribed)",
+      "caps": {
+        "BIOC": 60,
+        "COST": 25,
+        "MIBI": 60
+      },
+      "always": [
+        "CHEM",
+        "BIOL"
+      ],
+      "combinations": {
+        "1": [
+          "PLBL",
+          "ZOOL"
+        ],
+        "2": [
+          "COST",
+          "PLBL"
+        ],
+        "3": [
+          "COST",
+          "ZOOL"
+        ],
+        "4": [
+          "MIBI",
+          "PLBL"
+        ],
+        "5": [
+          "MIBI",
+          "ZOOL"
+        ],
+        "6": [
+          "BIOC",
+          "MIBI"
+        ],
+        "7": [
+          "BIOC",
+          "PLBL"
+        ],
+        "8": [
+          "BIOC",
+          "ZOOL"
+        ]
+      },
+      "awards": [
+        "bsc"
+      ]
+    },
+    "ps": {
+      "name": "Physical Science",
+      "ugc_intake": 362,
+      "subject_selection": "start of Y1 (if oversubscribed)",
+      "caps": {
+        "COSC": 150,
+        "COST": 25,
+        "ELEC": 40,
+        "STAT": 125
+      },
+      "combinations": {
+        "1": [
+          "AMAT",
+          "PHYS",
+          "PMAT"
+        ],
+        "2": [
+          "COSC",
+          "PHYS",
+          "PMAT"
+        ],
+        "3": [
+          "ELEC",
+          "PHYS",
+          "PMAT"
+        ],
+        "4": [
+          "AMAT",
+          "COSC",
+          "PMAT"
+        ],
+        "5": [
+          "COSC",
+          "PMAT",
+          "STAT"
+        ],
+        "6": [
+          "CHEM",
+          "COSC",
+          "PMAT"
+        ],
+        "7": [
+          "AMAT",
+          "CHEM",
+          "PMAT"
+        ],
+        "8": [
+          "COST",
+          "ELEC",
+          "PHYS"
+        ],
+        "9": [
+          "AMAT",
+          "PMAT",
+          "STAT"
+        ],
+        "10": [
+          "CHEM",
+          "COST",
+          "PMAT"
+        ]
+      },
+      "awards": [
+        "bsc"
+      ]
+    },
+    "encm": {
+      "name": "Environmental Conservation and Management",
+      "ugc_intake": 109,
+      "al_stream": "Biological Science (separate window)",
+      "awards": [
+        "bsc_encm"
+      ]
+    },
+    "pe": {
+      "name": "Physics and Electronics",
+      "ugc_intake": 76,
+      "paths": {
+        "1": [
+          "PHYS",
+          "ELEC",
+          "PMAT/AMAT"
+        ],
+        "2": [
+          "PHYS",
+          "ELEC",
+          "COST"
+        ]
+      },
+      "awards": [
+        "bsc_pe"
+      ]
+    }
+  },
+  "programmes": [
+    {
+      "id": "bsc",
+      "name": "Bachelor of Science",
+      "level": "SLQF5",
+      "years": 3,
+      "from_streams": [
+        "bs",
+        "ps"
+      ],
+      "award": {
+        "credits_D": "60 in Y1-2, 90 total, 30 per year",
+        "credits_C": "72, of which 48 from two subjects (24 each, one practical), +18 at D",
+        "min_gpa": 2.0,
+        "max_years": 5
+      }
+    },
+    {
+      "id": "bsc_encm",
+      "name": "BSc in Environmental Conservation and Management",
+      "level": "SLQF5",
+      "years": 3,
+      "from_streams": [
+        "encm"
+      ],
+      "award": {
+        "credits_D": "60 in Y1-2, 90 total, 30 per year",
+        "credits_C": "72, of which 48 compulsory, +18 at D",
+        "other": "<= 6 cr D/D+/C- in each of ENCM; PLBL+MIBI+ZOOL; CHEM",
+        "min_gpa": 2.0,
+        "max_years": 5
+      }
+    },
+    {
+      "id": "bsc_pe",
+      "name": "BSc in Physics and Electronics",
+      "level": "SLQF5",
+      "years": 3,
+      "from_streams": [
+        "pe"
+      ],
+      "award": {
+        "credits_D": "60 in Y1-2, 90 total, 30 per year",
+        "credits_C": "72, of which 48 from PHYS+ELEC (24 each), +18 at D",
+        "min_gpa": 2.0,
+        "max_years": 5
+      }
+    },
+    {
+      "id": "h_bioc",
+      "name": "BSc Hons in Biochemistry",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [
+          "BIOL 11532 included in C+ set",
+          "B or better for 2 more credits from CHEM 11622/11631/12661/21672/22712/22721"
+        ],
+        "department_caps_intake": false
+      },
+      "hons_structure_column": {
+        "bio": 8
+      },
+      "feeder_combinations_derived": {
+        "bs": [
+          "6",
+          "7",
+          "8"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_chem",
+      "name": "BSc Hons in Chemistry",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [],
+        "department_caps_intake": false
+      },
+      "hons_structure_column": {
+        "bio": 2,
+        "phys": 9
+      },
+      "feeder_combinations_derived": {
+        "bs": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "ps": [
+          "6",
+          "7",
+          "10"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_cosc",
+      "name": "BSc Hons in Computer Science",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [],
+        "department_caps_intake": true
+      },
+      "hons_structure_column": {
+        "phys": 7
+      },
+      "feeder_combinations_derived": {
+        "ps": [
+          "2",
+          "4",
+          "5",
+          "6"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_cost",
+      "name": "BSc Hons in Computer Studies",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [
+          "COST 31133 compulsory for Bio-stream entrants"
+        ],
+        "department_caps_intake": true
+      },
+      "hons_structure_column": {
+        "bio": 7,
+        "phys": 8
+      },
+      "feeder_combinations_derived": {
+        "bs": [
+          "2",
+          "3"
+        ],
+        "ps": [
+          "8",
+          "10"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_elec",
+      "name": "BSc Hons in Electronics",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [],
+        "department_caps_intake": true
+      },
+      "hons_structure_column": {
+        "phys": 10
+      },
+      "feeder_combinations_derived": {
+        "ps": [
+          "3",
+          "8"
+        ],
+        "pe": [
+          "1",
+          "2"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_encm",
+      "name": "BSc Hons in Environmental Conservation and Management",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [
+          "B or better in >= 40 credits of ENCM/CHEM/MIBI/PLBL/ZOOL Y1-2 compulsory units"
+        ],
+        "department_caps_intake": false
+      },
+      "hons_structure_column": {
+        "bio": 3
+      },
+      "feeder_combinations_derived": {
+        "encm": [
+          "fixed"
+        ]
+      },
+      "revert_to": "bsc_encm"
+    },
+    {
+      "id": "h_mphy",
+      "name": "BSc Hons in Mathematical Physics",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [
+          "Must have taken AMAT, PHYS and PMAT in Y1-2"
+        ],
+        "department_caps_intake": true
+      },
+      "hons_structure_column": {
+        "phys": 3
+      },
+      "feeder_combinations_derived": {
+        "ps": [
+          "1"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_math_am",
+      "name": "BSc Hons in Mathematics (Pure + Applied)",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [
+          "C+ in PMAT compulsory (20 cr) and AMAT compulsory (18 cr)"
+        ],
+        "department_caps_intake": true
+      },
+      "hons_structure_column": {
+        "phys": 1
+      },
+      "feeder_combinations_derived": {
+        "ps": [
+          "1",
+          "4",
+          "7",
+          "9"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_math_st",
+      "name": "BSc Hons in Mathematics (Pure + Statistics)",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [
+          "C+ in PMAT compulsory (20 cr) and STAT compulsory (20 cr)"
+        ],
+        "department_caps_intake": true
+      },
+      "hons_structure_column": {
+        "phys": 2
+      },
+      "feeder_combinations_derived": {
+        "ps": [
+          "5",
+          "9"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_mibi",
+      "name": "BSc Hons in Microbiology",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [
+          "C+ in MIBI compulsory + BIOL 11512 totalling >= 20 credits"
+        ],
+        "department_caps_intake": false
+      },
+      "hons_structure_column": {
+        "bio": 4
+      },
+      "feeder_combinations_derived": {
+        "bs": [
+          "4",
+          "5",
+          "6"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_mbbt",
+      "name": "BSc Hons in Molecular Biology and Plant Biotechnology",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [
+          "C+ in PLBL compulsory",
+          "B or better in those + BIOL 11512 totalling 22 cr",
+          "B+ or better in BIOL 11522 and PLBL 21532"
+        ],
+        "department_caps_intake": false
+      },
+      "hons_structure_column": {
+        "bio": 5
+      },
+      "feeder_combinations_derived": {
+        "bs": [
+          "1",
+          "2",
+          "4",
+          "7"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_phys",
+      "name": "BSc Hons in Physics",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [
+          "Two Y3-4 structures: without Electronics (col 4) / with Electronics (col 5)"
+        ],
+        "department_caps_intake": true
+      },
+      "hons_structure_column": {
+        "phys": [
+          4,
+          5
+        ]
+      },
+      "feeder_combinations_derived": {
+        "ps": [
+          "1",
+          "2",
+          "3",
+          "8"
+        ],
+        "pe": [
+          "1",
+          "2"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_plbl",
+      "name": "BSc Hons in Plant Biology",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [
+          "B or better in PLBL compulsory + BIOL 11512 + BIOL 11522 totalling 22 cr"
+        ],
+        "department_caps_intake": false
+      },
+      "hons_structure_column": {
+        "bio": 1
+      },
+      "feeder_combinations_derived": {
+        "bs": [
+          "1",
+          "2",
+          "4",
+          "7"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_stat",
+      "name": "BSc Hons in Statistics",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [],
+        "department_caps_intake": true
+      },
+      "hons_structure_column": {
+        "phys": 6
+      },
+      "feeder_combinations_derived": {
+        "ps": [
+          "5",
+          "9"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_zool",
+      "name": "BSc Hons in Zoology",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "end_of_year_2",
+      "entry": {
+        "standard_gate": [
+          "GPA >= 3.00",
+          "C or better in all Y1-2 compulsory units of the subject",
+          "<= 8 credits of D/D+/C- across all Y1-2 units",
+          "No E grades in Y1-2"
+        ],
+        "extra": [
+          "B or better in ZOOL compulsory + BIOL 11552/11512/11522 totalling >= 20 cr"
+        ],
+        "department_caps_intake": false
+      },
+      "hons_structure_column": {
+        "bio": 6
+      },
+      "feeder_combinations_derived": {
+        "bs": [
+          "1",
+          "3",
+          "5",
+          "8"
+        ]
+      },
+      "revert_to": "bsc"
+    },
+    {
+      "id": "h_mit_it",
+      "name": "BSc Hons in Management and IT / Information Technology",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "direct",
+      "branches": {
+        "end_of_year_1": [
+          "MIT",
+          "IT"
+        ],
+        "MIT_end_of_year_2": [
+          "Information Systems",
+          "Business Systems Engineering",
+          "Operations and Supply Chain Management"
+        ]
+      },
+      "award": {
+        "credits_D": "72 in Y1-2, 132 total, 30 in each of Y3 and Y4",
+        "credits_C": 105,
+        "must_C": [
+          "MGTE 43216 or INTE 43216",
+          "INTE 31356",
+          "GNCT 32216",
+          "GNCT 13212",
+          "GNCT 23212"
+        ],
+        "min_gpa": 2.0,
+        "max_years": 6
+      },
+      "exits": [
+        {
+          "award": "BSc (MIT) / BSc (IT)",
+          "after": "Y3",
+          "credits_D": "72 in Y1-2, 102 total, 30 in Y3",
+          "credits_C": "85; compulsory C+ >= 70 (MIT) / 68 (IT)",
+          "must_C": [
+            "INTE 31356",
+            "GNCT 32216",
+            "GNCT 13212",
+            "GNCT 23212"
+          ],
+          "max_years": 5
+        },
+        {
+          "award": "Higher Diploma in MIT / IT",
+          "after": "Y2",
+          "credits_D": "72 in Y1-2",
+          "credits_C": 60,
+          "must_C": [
+            "GNCT 13212",
+            "GNCT 23212"
+          ],
+          "max_years": 6
+        }
+      ]
+    },
+    {
+      "id": "h_seng",
+      "name": "BSc Hons in Software Engineering",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "direct",
+      "features": [
+        "6-month internship",
+        "1-year research component"
+      ],
+      "branches": {
+        "application_domain": [
+          "Net Centric",
+          "Mobile Computing",
+          "Data Science and Engineering",
+          "Health Informatics",
+          "Digital Gaming and Animation",
+          "Business Engineering"
+        ]
+      },
+      "award": {
+        "credits_D": "120 incl. all compulsory, 30 per year, >= 9 in one domain",
+        "credits_C": "104; compulsory+domain C+ >= 90",
+        "must_C": [
+          "SENG 31242",
+          "SENG 34213",
+          "SENG 32216",
+          "SENG 43216"
+        ],
+        "must_pass": [
+          "GNCT 13212",
+          "GNCT 23212"
+        ],
+        "min_gpa": 2.0,
+        "max_years": 6
+      }
+    },
+    {
+      "id": "h_becs",
+      "name": "BSc Hons in Electronics and Computer Science",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "direct",
+      "branches": {
+        "end_of_year_2": [
+          "Electronics and Computer Science (general)",
+          "Specialisation in Electronics",
+          "Specialisation in Computer Science"
+        ]
+      },
+      "specialisation_gate": [
+        "GPA >= 3.00 in subject compulsory modules Y1-2 (24 cr Electronics / 23 cr CS)",
+        "C or better in all those modules",
+        "<= 8 cr D/D+/C- in Y1-2",
+        "No E in Y1-2",
+        "Department caps"
+      ],
+      "award": {
+        "credits": "C+ >= 104 + 16 at D, >= 30 per SLQF level",
+        "min_gpa": 2.0,
+        "max_years": 6
+      },
+      "revert_to": "BSc in Electronics and Computer Science"
+    },
+    {
+      "id": "h_apch",
+      "name": "BSc Hons in Applied Chemistry",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "direct",
+      "path": "fixed",
+      "award": {
+        "credits_D": "60 in Y1-2, 120 total, 30 per year",
+        "credits_C": "96; compulsory C+ >= 84",
+        "min_gpa": 2.0,
+        "max_years": 6
+      }
+    },
+    {
+      "id": "h_bsss",
+      "name": "BSc Hons in Sports Science",
+      "level": "SLQF6",
+      "years": 4,
+      "intake": "direct",
+      "path": "fixed",
+      "features": [
+        "4-week foundation programme with Certificate of Completion"
+      ],
+      "award": {
+        "credits": "C+ >= 104 + 16 at D, >= 30 per SLQF level",
+        "min_gpa": 2.0,
+        "max_years": 6
+      }
+    }
+  ],
+  "classes": {
+    "bsc_family": {
+      "first": {
+        "gpa": 3.7,
+        "C_credits": 90,
+        "A_share": 0.5
+      },
+      "second_upper": {
+        "gpa": 3.3,
+        "C_credits": 80,
+        "B_share": 0.5
+      },
+      "second_lower": {
+        "gpa": 3.0,
+        "C_credits": 80,
+        "B_share": 0.5
+      },
+      "within_years": 3
+    },
+    "hons_subject": {
+      "first": {
+        "gpa": 3.7,
+        "C_credits": 126,
+        "A_share_L4_spec": 0.5,
+        "A_share_L3_L4_spec": 0.5
+      },
+      "second_upper": {
+        "gpa": 3.3,
+        "C_credits": 116
+      },
+      "second_lower": {
+        "gpa": 3.0,
+        "C_credits": 116
+      },
+      "within_years": 4
+    },
+    "mit_it_hons": {
+      "first": {
+        "gpa": 3.7,
+        "C_credits": "all",
+        "A_share": 0.5
+      },
+      "second_upper": {
+        "gpa": 3.3,
+        "C_credits": 117,
+        "B_share": 0.5
+      },
+      "second_lower": {
+        "gpa": 3.0,
+        "C_credits": 117,
+        "B_share": 0.5
+      }
+    },
+    "mit_it_3yr": {
+      "first": {
+        "gpa": 3.7,
+        "C_credits": "all"
+      },
+      "second_upper": {
+        "gpa": 3.3,
+        "C_credits": 99
+      },
+      "second_lower": {
+        "gpa": 3.0,
+        "C_credits": 99
+      }
+    },
+    "seng": {
+      "first": {
+        "gpa": 3.7,
+        "C_credits": "all",
+        "A_share_compulsory": 0.5,
+        "A_share": 0.5
+      },
+      "second_upper": {
+        "gpa": 3.3,
+        "C_credits": 110
+      },
+      "second_lower": {
+        "gpa": 3.0,
+        "C_credits": 110
+      }
+    },
+    "becs_bsss": {
+      "first": {
+        "gpa": 3.7,
+        "C_credits": 120,
+        "A_share": 0.5
+      },
+      "second_upper": {
+        "gpa": 3.3,
+        "C_credits": "112 + 8 at D",
+        "B_share": 0.5
+      },
+      "second_lower": {
+        "gpa": 3.0,
+        "C_credits": "112 + 8 at D",
+        "B_share": 0.5
+      },
+      "bsss_note": "shares apply per SLQF level"
+    },
+    "apch": {
+      "first": {
+        "gpa": 3.7,
+        "C_credits": 120,
+        "A_share_L4": 0.5
+      },
+      "second_upper": {
+        "gpa": 3.3,
+        "C_credits": 110,
+        "B_share_L4": 0.5
+      },
+      "second_lower": {
+        "gpa": 3.0,
+        "C_credits": 110,
+        "B_share_L4": 0.5
+      }
+    }
+  }
+}
