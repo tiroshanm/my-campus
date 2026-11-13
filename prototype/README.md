@@ -70,7 +70,7 @@ Changes made during a session, such as registering, entering marks or approving 
 | 3 | Student | **Repeat & medical** tab: register and pay for the repeat. The payment is simulated. | REG-04, EXM-01 |
 | 4 | Student | **Degree progress**: BSc award progress and the Honours "what-if" check | EXM-10 |
 | 5 | Student | **Selections**: rank Honours preferences | SEL-03 |
-| 6 | Lecturer | **Result sheet** for COSC 12043: **Fill sample marks (demo)**, check the repeat and lab-attendance caps, then **Submit to 2nd examiner** | EXM-05, EXM-18 |
+| 6 | Lecturer | **Result sheet** for COSC 12043: **Download Excel template**, enter marks in Excel, then **Upload marks (Excel)** and review the preview. Or use **Fill sample marks (demo)**. Check the repeat and lab-attendance caps, then **Submit to 2nd examiner**. | EXM-05, EXM-13, EXM-18 |
 | 7 | Lecturer | **Mark entry**, then COSC 12033 as 2nd examiner: **Verify** | EXM-05 |
 | 8 | Head of Department | **Approvals**: recommend a verified sheet | EXM-05 |
 | 9 | Dean | **Approvals**: approve, then release. Also approve or reject an appeal. | EXM-05, REQ-01 |
@@ -78,6 +78,29 @@ Changes made during a session, such as registering, entering marks or approving 
 | 11 | Exam Branch | **Selection rounds**: run the Honours allocation, then publish it | SEL-01 to SEL-03 |
 | 12 | Exam Branch | **Pass list & Dean's list**, **Students** (change status, move results to a new registration number), **Reports** | EXM-11, REG-08, REG-12, SCH-* |
 | 13 | HoD / Dean | **Analytics**: descriptive, diagnostic and predictive views | ANA-01 to ANA-03 |
+
+## Marks in Excel
+
+Examiners can work in Excel instead of typing marks on screen.
+
+1. **Download Excel template.** The result sheet gives an `.xlsx` file with:
+   - the class list
+   - the mark weights
+   - any marks already entered
+   - columns for CA, Practical, Final exam and Absent (Y)
+   - live formulas for the total and provisional grade
+   - an Instructions tab
+2. **Fill it in** in Excel, LibreOffice or Google Sheets, and save it as `.xlsx`. CSV files are accepted too.
+3. **Upload marks (Excel).** A preview runs before anything changes. It:
+   - counts the valid rows and absent students
+   - lists every row with a problem: marks outside 0 to 100, text in a mark column, an unknown or duplicate registration number
+   - refuses files that belong to a different result sheet, which it checks through the **Sheet ID**
+   - keeps a student's existing marks when that row is empty in the file
+   - applies only the valid rows
+
+The system recalculates every grade after upload, including the repeat cap at C and the lab-attendance caps. Each upload is recorded in the sheet history and the audit log. The Head of Department, Dean and Exam Branch can download any result sheet as Excel.
+
+Excel files are read and written in the browser with [SheetJS](https://sheetjs.com) 0.20.3 (Apache 2.0), included in `assets/vendor/`.
 
 ## What is real and what is simulated
 
@@ -115,6 +138,7 @@ prototype/
 ├── index.html               shell: banner, navigation, role switcher, feedback panel
 ├── assets/css/app.css       design tokens (light and dark), layout, components
 ├── assets/img/fos-logo.png  Faculty logo (from fos.kln.ac.lk)
+├── assets/vendor/           SheetJS 0.20.3 (Excel read/write) and its licence
 ├── feedback-sheet/          Apps Script: feedback → spreadsheet in Drive folder + email + Excel copy
 └── assets/js/
     ├── config.js            feedback Sheet URL and token (edit after deploying the script)
